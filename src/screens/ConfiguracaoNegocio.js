@@ -1,60 +1,46 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import db from '../database/database';
+import { AppContext } from '../context/AppContext';
 
-export default function ConfiguracaoNegocio() {
-  const [salario, setSalario] = useState('');
-  const [horas, setHoras] = useState('');
+export default function ConfiguracaoNegocio({ navigation }) {
+  const { config, setConfig } = useContext(AppContext);
 
-  const salvarConfiguracao = () => {
-    if (!salario || !horas) {
-      Alert.alert("Erro", "Preencha todos os campos.");
-      return;
+  const validarEAvançar = () => {
+    if (parseFloat(config.salario) > 0 && parseFloat(config.dias) > 0) {
+      navigation.navigate('Insumos');
+    } else {
+      Alert.alert("Erro", "Preencha os valores de salário e tempo de trabalho.");
     }
-
-    // Lógica para salvar no SQLite (RNF01 - Offline)
-    db.runSync(
-      'INSERT OR REPLACE INTO configuracoes (id, salario_pretendido, horas_mensais) VALUES (1, ?, ?)',
-      [parseFloat(salario), parseFloat(horas)]
-    );
-    
-    Alert.alert("Sucesso", "Configurações salvas!");
   };
 
   return (
     <ScrollView className="flex-1 bg-white p-6">
-      <Text className="text-2xl font-bold text-gray-800 mb-2">Configuração do Negócio</Text>
-      <Text className="text-gray-500 mb-8">Defina sua base de cálculo para a mão de obra.</Text>
+      <Text className="text-xl font-bold text-blue-800 mb-6">Custos Fixos e Mão de Obra</Text>
+      
+      <Text className="text-gray-600 font-bold">Salário Mensal Desejado (R$)</Text>
+      <TextInput 
+        className="bg-gray-100 p-4 rounded-xl mb-4 border border-gray-200"
+        keyboardType="decimal-pad"
+        value={config.salario}
+        onChangeText={(v) => setConfig({...config, salario: v.replace(/[^0-9.]/g, '')})} 
+      />
 
-      {/* Input Salário Pretendido (RF05) */}
-      <View className="mb-6">
-        <Text className="text-gray-700 font-semibold mb-2">Salário Mensal Pretendido (R$)</Text>
-        <TextInput 
-          className="border border-gray-300 rounded-lg p-4 text-lg"
-          placeholder="Ex: 3000"
-          keyboardType="numeric"
-          value={salario}
-          onChangeText={setSalario}
-        />
+      <View className="flex-row justify-between mb-4">
+        <View className="w-[48%]">
+          <Text className="text-gray-600 font-bold">Dias/Mês</Text>
+          <TextInput keyboardType="numeric" className="bg-gray-100 p-4 rounded-xl" value={config.dias} onChangeText={(v) => setConfig({...config, dias: v.replace(/[^0-9]/g, '')})} />
+        </View>
+        <View className="w-[48%]">
+          <Text className="text-gray-600 font-bold">Horas/Dia</Text>
+          <TextInput keyboardType="numeric" className="bg-gray-100 p-4 rounded-xl" value={config.horas} onChangeText={(v) => setConfig({...config, horas: v.replace(/[^0-9]/g, '')})} />
+        </View>
       </View>
 
-      {/* Input Horas Trabalhadas (RF05) */}
-      <View className="mb-10">
-        <Text className="text-gray-700 font-semibold mb-2">Horas de Trabalho por Mês</Text>
-        <TextInput 
-          className="border border-gray-300 rounded-lg p-4 text-lg"
-          placeholder="Ex: 160"
-          keyboardType="numeric"
-          value={horas}
-          onChangeText={setHoras}
-        />
-      </View>
+      <Text className="text-gray-600 font-bold">Custos Fixos (Aluguel, Luz, etc.)</Text>
+      <TextInput keyboardType="decimal-pad" className="bg-gray-100 p-4 rounded-xl mb-4" value={config.custoFixo} onChangeText={(v) => setConfig({...config, custoFixo: v})} />
 
-      <TouchableOpacity 
-        className="bg-blue-600 p-4 rounded-xl shadow-md"
-        onPress={salvarConfiguracao}
-      >
-        <Text className="text-white text-center font-bold text-lg">Salvar Configurações</Text>
+      <TouchableOpacity className="bg-blue-600 p-5 rounded-2xl mt-4" onPress={validarEAvançar}>
+        <Text className="text-white text-center font-bold text-lg">DEFINIR INSUMOS</Text>
       </TouchableOpacity>
     </ScrollView>
   );
