@@ -14,7 +14,6 @@ export default function Login({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-white justify-center p-8"
     >
-      {/* Cabeçalho do App */}
       <View className="items-center mb-12">
         <View className="w-20 h-20 bg-blue-600 rounded-3xl items-center justify-center mb-4 shadow-lg">
           <Text className="text-white text-4xl font-bold">A</Text>

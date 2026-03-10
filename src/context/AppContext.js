@@ -3,13 +3,31 @@ import React, { createContext, useState } from 'react';
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  // Dados de Mão de Obra e Tempo
   const [config, setConfig] = useState({
-    salario: '0', dias: '0', horas: '0', custoFixo: '0', despesaFixa: '0', despesaVariavel: '0'
+    salario: '', 
+    dias: '', 
+    horas: ''
   });
-  const [insumos, setInsumos] = useState([]); // Lista para múltiplos insumos
+
+  // Lista dinâmica de Custos Fixos
+  const [listaCustosFixos, setListaCustosFixos] = useState([]);
+
+  // Insumos do produto
+  const [insumos, setInsumos] = useState([]);
+
+  // Soma automática dos custos para o motor de cálculo
+  const totalCustosFixos = listaCustosFixos.reduce(
+    (acc, item) => acc + (parseFloat(item.valor) || 0), 0
+  );
 
   return (
-    <AppContext.Provider value={{ config, setConfig, insumos, setInsumos }}>
+    <AppContext.Provider value={{ 
+      config, setConfig, 
+      insumos, setInsumos, 
+      listaCustosFixos, setListaCustosFixos, 
+      totalCustosFixos 
+    }}>
       {children}
     </AppContext.Provider>
   );

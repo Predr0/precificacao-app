@@ -1,11 +1,9 @@
 import * as SQLite from 'expo-sqlite';
 
-//Abrir/criar BD
 const db = SQLite.openDatabaseSync('precificacao.db');
 
 export const initDatabase = () => {
   try {
-    //RF03 e RF04 => criar tabela Insumos
     db.execSync(`
       CREATE TABLE IF NOT EXISTS insumos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,7 +14,6 @@ export const initDatabase = () => {
       );
     `);
 
-    //RF05 => criar tabela Configurações
     db.execSync(`
       CREATE TABLE IF NOT EXISTS configuracoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

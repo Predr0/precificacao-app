@@ -3,26 +3,22 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { AppContext } from '../context/AppContext';
 
 export default function CalculoProduto() {
-  const { config, insumos } = useContext(AppContext);
-  const [lucroDesejado] = useState(30); // %
+  const { config, insumos, totalCustosFixos } = useContext(AppContext); // Puxando o total somado
+  const [lucroDesejado] = useState(30); 
 
   const calcular = () => {
-    const tempoProducaoMin = 30; // Exemplo de tempo gasto
-    const totalMinutosMes = parseFloat(config.dias) * parseFloat(config.horas) * 60;
+    const tempoProducaoMin = 30; 
+    const totalMinutosMes = (parseFloat(config.dias) || 1) * (parseFloat(config.horas) || 1) * 60;
     
-    // 1. Custo Variável Total (Insumos)
     const CVR = insumos.reduce((acc, curr) => acc + curr.custoFração, 0);
 
-    // 2. Rateio Mão de Obra e Fixos
-    const custoPorMinuto = (parseFloat(config.salario) + parseFloat(config.custoFixo)) / totalMinutosMes;
+    // Mão de obra + SOMA de todos os custos fixos cadastrados
+    const custoPorMinuto = (parseFloat(config.salario) + totalCustosFixos) / totalMinutosMes;
     const CFR = custoPorMinuto * tempoProducaoMin;
 
-    // 3. Total Geral
     const totalGeral = CVR + CFR;
 
-    // 4. Mark-up
-    // MARK-UP = 100 / [100 – (%DFR + %DVR + %Lucro)]
-    // Para o MVP, usaremos os percentuais fixos do seu exemplo (5% despesas + lucro)
+    // Mark-up
     const markup = 100 / (100 - (5 + 3 + lucroDesejado)); 
     const precoFinal = totalGeral * markup;
 
@@ -41,7 +37,7 @@ export default function CalculoProduto() {
         
         <View className="h-[1px] bg-gray-300 my-4" />
         
-        <Text className="text-gray-600">Total de Custos + Rateio:</Text>
+        <Text className="text-gray-600">Total (Custos + Rateio de {totalCustosFixos > 0 ? 'Fixos' : 'Mão de Obra'}):</Text>
         <Text className="text-xl font-bold text-blue-800">R$ {res.totalGeral.toFixed(2)}</Text>
       </View>
 
@@ -51,9 +47,9 @@ export default function CalculoProduto() {
         <Text className="text-white mt-2">Índice Mark-up: {res.markup.toFixed(2)}</Text>
       </View>
 
-      <View className="mt-6 p-4 border border-red-200 rounded-2xl">
+      <View className="mt-6 p-4 border border-red-200 rounded-2xl mb-10">
         <Text className="text-red-600 font-bold">Ponto de Equilíbrio</Text>
-        <Text className="text-sm">Você precisa vender aprox. {Math.ceil((parseFloat(config.salario) + parseFloat(config.custoFixo)) / (res.precoFinal - res.CVR))} unidades para não ter prejuízo.</Text>
+        <Text className="text-sm">Venda {Math.ceil((parseFloat(config.salario) + totalCustosFixos) / (res.precoFinal - res.CVR))} unidades/mês para cobrir os gastos fixos.</Text>
       </View>
     </ScrollView>
   );
