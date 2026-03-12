@@ -22,7 +22,6 @@ export default function Login({ navigation }) {
         <Text className="text-gray-500">Gestão e Precificação</Text>
       </View>
 
-      {/* Formulário (RF01) */}
       <View className="space-y-4">
         <View>
           <Text className="text-gray-600 ml-1 mb-1">E-mail</Text>
@@ -48,7 +47,6 @@ export default function Login({ navigation }) {
         </View>
       </View>
 
-      {/*Entrar no app aqui*/}
       <TouchableOpacity 
         className="bg-blue-600 p-5 rounded-2xl mt-10 shadow-md active:bg-blue-700"
         onPress={handleLogin}

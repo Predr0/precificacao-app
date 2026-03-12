@@ -2,33 +2,30 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 
 export default function Precificacao() {
-  // Inputs de Insumos (Regra de Três)
-  const [precoInsumo, setPrecoInsumo] = useState('25.00'); // Preço de Compra
-  const [qtdEmbalagem, setQtdEmbalagem] = useState('1000'); // Unidade total (ex: 1000g)
-  const [qtdUtilizada, setQtdUtilizada] = useState('200'); // Quantidade na receita (ex: 200g)
+
+  const [precoInsumo, setPrecoInsumo] = useState('25.00'); 
+  const [qtdEmbalagem, setQtdEmbalagem] = useState('1000'); 
+  const [qtdUtilizada, setQtdUtilizada] = useState('200'); 
   
-  // Inputs de Produção
+
   const [tempoMinutos, setTempoMinutos] = useState('60');
-  const [lucroDesejado, setLucroDesejado] = useState('30'); // %
+  const [lucroDesejado, setLucroDesejado] = useState('30'); 
 
   const [res, setRes] = useState(null);
 
   const calcular = () => {
-    // --- DADOS BUSCADOS DA CONFIGURAÇÃO (Simulação do SQLite) ---
     const config = { salario: 5000, dias: 22, horas: 8, CF: 500, DF: 200, DV: 300 };
     const cargaHorariaMinutos = config.dias * config.horas * 60;
     const tempo = parseFloat(tempoMinutos);
 
-    // 1. CV - Custo Variável do Insumo (Regra de 3)
     const CV_Insumo = (parseFloat(precoInsumo) / parseFloat(qtdEmbalagem)) * parseFloat(qtdUtilizada);
 
-    // 2. Rateio por Minuto (Mão de obra + Fixos)
     const minMaoObra = config.salario / cargaHorariaMinutos;
     const minCF = config.CF / cargaHorariaMinutos;
     const minDF = config.DF / cargaHorariaMinutos;
     const minDV = config.DV / cargaHorariaMinutos;
 
-    // 3. Totais do Produto
+
     const totalMaoObra = minMaoObra * tempo;
     const totalCF = minCF * tempo;
     const totalDF = minDF * tempo;

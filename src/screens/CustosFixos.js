@@ -5,7 +5,7 @@ import { AppContext } from '../context/AppContext';
 export default function CustosFixos() {
   const { listaCustosFixos, setListaCustosFixos, totalCustosFixos } = useContext(AppContext);
 
-  // Função para atualizar o valor de um custo específico
+ 
   const handleUpdateValue = (id, valor) => {
     const novaLista = listaCustosFixos.map(item => 
       item.id === id ? { ...item, valor: valor.replace(/[^0-9.]/g, '') } : item
@@ -13,7 +13,7 @@ export default function CustosFixos() {
     setListaCustosFixos(novaLista);
   };
 
-  // Função para adicionar um novo custo personalizado
+ 
   const adicionarNovoCusto = () => {
     const novoCusto = { id: Date.now().toString(), nome: 'Novo Gasto', valor: '0' };
     setListaCustosFixos([...listaCustosFixos, novoCusto]);
