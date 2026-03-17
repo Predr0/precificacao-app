@@ -6,6 +6,8 @@ import { AppProvider } from './src/context/AppContext';
 import ConfiguracaoNegocio from './src/screens/ConfiguracaoNegocio';
 import Insumos from './src/screens/Insumos';
 import CalculoProduto from './src/screens/CalculoProduto';
+import DespesasFixas from './src/screens/DespesasFixas';
+import DespesasVariaveis from './src/screens/DespesasVariaveis';
 
 const Stack = createStackNavigator();
 
@@ -15,6 +17,8 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator initialRouteName="ConfiguracaoNegocio">
           <Stack.Screen name="ConfiguracaoNegocio" component={ConfiguracaoNegocio} options={{ title: 'Configurações' }} />
+          <Stack.Screen name="DespesasFixas" component={DespesasFixas} options={{ title: 'Despesas Fixas' }} />
+          <Stack.Screen name="DespesasVariaveis" component={DespesasVariaveis} options={{ title: 'Despesas Variáveis' }} />
           <Stack.Screen name="Insumos" component={Insumos} options={{ title: 'Insumos' }} />
           <Stack.Screen name="CalculoProduto" component={CalculoProduto} options={{ title: 'Motor de Precificação' }} />
         </Stack.Navigator>

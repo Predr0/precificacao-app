@@ -24,11 +24,9 @@ export default function ConfiguracaoNegocio({ navigation }) {
     <ScrollView className="flex-1 bg-white p-6">
       <Text className="text-2xl font-bold text-blue-900 mb-6">Configuração do Negócio</Text>
 
-      {/* SEÇÃO 1: SUA MÃO DE OBRA */}
       <View className="bg-gray-50 p-5 rounded-3xl mb-6 border border-gray-100 shadow-sm">
         <Text className="font-bold text-gray-800 mb-4">Seu Pró-Labore e Tempo</Text>
         
-        {/* Label para Salário */}
         <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Salário Mensal Desejado (R$)</Text>
         <TextInput 
           placeholder="Ex: 5000"
@@ -40,7 +38,6 @@ export default function ConfiguracaoNegocio({ navigation }) {
 
         <View className="flex-row justify-between">
           <View className="w-[48%]">
-            {/* Label para Dias */}
             <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Dias p/ mês</Text>
             <TextInput 
               placeholder="Ex: 22"
@@ -51,7 +48,6 @@ export default function ConfiguracaoNegocio({ navigation }) {
             />
           </View>
           <View className="w-[48%]">
-            {/* Label para Horas */}
             <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Horas p/ dia</Text>
             <TextInput 
               placeholder="Ex: 8"
@@ -63,8 +59,6 @@ export default function ConfiguracaoNegocio({ navigation }) {
           </View>
         </View>
       </View>
-
-      {/* SEÇÃO 2: COLABORADORES */}
       <View className="bg-green-50 p-5 rounded-3xl mb-6 border border-green-100">
         <Text className="font-bold text-green-800 mb-4">Adicionar Colaborador (Fixo)</Text>
         <TextInput placeholder="Nome" className="bg-white p-4 rounded-2xl mb-2 border border-green-200" value={nomeColab} onChangeText={setNomeColab} />
@@ -81,7 +75,6 @@ export default function ConfiguracaoNegocio({ navigation }) {
         ))}
       </View>
 
-      {/* SEÇÃO 3: CUSTOS FIXOS */}
       <View className="bg-blue-50 p-5 rounded-3xl mb-10 border border-blue-100">
         <Text className="font-bold text-blue-800 mb-4">Outros Custos Fixos (Luz, MEI...)</Text>
         <TextInput placeholder="Nome do Custo" className="bg-white p-4 rounded-2xl mb-2 border border-blue-200" value={nomeCusto} onChangeText={setNomeCusto} />
@@ -98,7 +91,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
         ))}
       </View>
 
-      <TouchableOpacity className="bg-black p-6 rounded-3xl mb-12 shadow-lg" onPress={() => navigation.navigate('Insumos')}>
+      <TouchableOpacity className="bg-black p-6 rounded-3xl mb-12 shadow-lg" onPress={() => navigation.navigate('DespesasFixas')}>
         <Text className="text-white text-center font-black text-lg">PROSSEGUIR PARA MATERIAIS</Text>
       </TouchableOpacity>
     </ScrollView>

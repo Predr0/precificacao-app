@@ -1,31 +1,35 @@
-import React, { createContext, useState } from 'react'; // <--- IMPORTAÇÃO ESSENCIAL
+import React, { createContext, useState } from 'react';
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [config, setConfig] = useState({ salario: '0', dias: '0', horas: '0', lucroDesejado: '30' });
-  const [insumos, setInsumos] = useState([]); // <--- INICIALIZADO COMO ARRAY
+  const [config, setConfig] = useState({ salario: '', dias: '', horas: '', lucroDesejado: '30' });
+  const [insumos, setInsumos] = useState([]);
   const [listaCustosFixos, setListaCustosFixos] = useState([]);
   const [listaColaboradores, setListaColaboradores] = useState([]);
   const [unidades, setUnidades] = useState(['unid', 'kg', 'g', 'm', 'cm']);
 
-  // Cálculo do Custo Fixo Mensal Total (Soma tudo)
-  const totalSalarios = (parseFloat(config.salario) || 0) + 
-    listaColaboradores.reduce((acc, col) => acc + (parseFloat(col.salario) || 0), 0);
+  // NOVAS LISTAS (RF07 e RF08)
+  const [listaDespesasFixas, setListaDespesasFixas] = useState([]);
+  const [listaDespesasVariaveis, setListaDespesasVariaveis] = useState([]);
 
-  const totalOperacional = listaCustosFixos.reduce(
-    (acc, item) => acc + (parseFloat(item.valor) || 0), 0
-  );
+  // TOTAIS MENSAIS (Para as fórmulas de rateio)
+  const totalCF_Mensal = (parseFloat(config.salario) || 0) + 
+    listaColaboradores.reduce((acc, c) => acc + (parseFloat(c.salario) || 0), 0) +
+    listaCustosFixos.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
 
-  const totalCF_Mensal = totalSalarios + totalOperacional;
+  const totalDF_Mensal = listaDespesasFixas.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+  const totalDV_Mensal = listaDespesasVariaveis.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
 
   return (
     <AppContext.Provider value={{ 
       config, setConfig, insumos, setInsumos, 
       listaCustosFixos, setListaCustosFixos,
       listaColaboradores, setListaColaboradores,
+      listaDespesasFixas, setListaDespesasFixas,
+      listaDespesasVariaveis, setListaDespesasVariaveis,
       unidades, setUnidades,
-      totalCF_Mensal // <--- VARIÁVEL QUE O CÁLCULO VAI USAR
+      totalCF_Mensal, totalDF_Mensal, totalDV_Mensal
     }}>
       {children}
     </AppContext.Provider>

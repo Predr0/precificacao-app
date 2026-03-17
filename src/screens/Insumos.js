@@ -33,7 +33,6 @@ export default function Insumos({ navigation }) {
     <ScrollView className="flex-1 bg-white p-6">
       <Text className="text-xl font-bold mb-4">Cadastro de Materiais (Custos Variáveis)</Text>
 
-      {/* Adicionar Nova Unidade */}
       <View className="flex-row mb-4">
         <TextInput placeholder="Nova Unidade (ex: kw)" className="bg-gray-100 p-3 rounded-l-lg flex-1" value={novaUnidade} onChangeText={setNovaUnidade} />
         <TouchableOpacity className="bg-gray-800 p-3 rounded-r-lg justify-center" onPress={addNovaMedida}>
@@ -66,7 +65,7 @@ export default function Insumos({ navigation }) {
         </View>
       ))}
 
-      <TouchableOpacity className="bg-green-600 p-5 rounded-2xl mt-6 mb-10" onPress={() => navigation.navigate('CalculoProduto')}>
+      <TouchableOpacity className="bg-green-600 p-5 rounded-2xl mt-6 mb-10" onPress={() => navigation.navigate('DespesasVariaveis')}>
         <Text className="text-white text-center font-bold">VER RESULTADO FINAL</Text>
       </TouchableOpacity>
     </ScrollView>
