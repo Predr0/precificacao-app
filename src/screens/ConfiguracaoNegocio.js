@@ -36,8 +36,9 @@ export default function ConfiguracaoNegocio({ navigation }) {
     <ScrollView className="flex-1 bg-white p-6">
       <Text className="text-2xl font-black text-blue-900 mb-6">Configuração do Negócio</Text>
 
+      {/* BLOCO: BASE DE TEMPO, SALÁRIO E LUCRO */}
       <View className="bg-gray-50 p-5 rounded-3xl mb-6 border border-gray-100 shadow-sm">
-        <Text className="font-bold text-gray-800 mb-4 italic text-sm">Base de Tempo e Salário</Text>
+        <Text className="font-bold text-gray-800 mb-4 italic text-sm">Parâmetros Iniciais</Text>
         
         <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Seu Salário Mensal Desejado (R$)</Text>
         <TextInput 
@@ -71,16 +72,27 @@ export default function ConfiguracaoNegocio({ navigation }) {
           </View>
         </View>
 
-        <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Tempo de Produção (Minutos)</Text>
+        <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Tempo de Produção Unitário (Minutos)</Text>
         <TextInput 
           placeholder="Ex: 30"
           keyboardType="numeric"
-          className="bg-white p-4 rounded-2xl border border-gray-200 font-bold text-purple-700"
+          className="bg-white p-4 rounded-2xl border border-gray-200 font-bold text-purple-700 mb-4"
           value={config.tempoProducao}
           onChangeText={(v) => setConfig({...config, tempoProducao: v.replace(/[^0-9]/g, '')})}
         />
+
+        {/* NOVO INPUT: PERCENTUAL DE LUCRO (RF11) */}
+        <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Margem de Lucro Desejada (%)</Text>
+        <TextInput 
+          placeholder="Ex: 30"
+          keyboardType="numeric"
+          className="bg-white p-4 rounded-2xl border border-gray-200 font-bold text-green-700"
+          value={config.lucroDesejado}
+          onChangeText={(v) => setConfig({...config, lucroDesejado: v.replace(/[^0-9.]/g, '')})}
+        />
       </View>
 
+      {/* BLOCO: COLABORADORES COM LIXEIRINHA */}
       <View className="bg-green-50 p-5 rounded-3xl mb-6 border border-green-100">
         <Text className="font-bold text-green-800 mb-4">Colaboradores Fixos</Text>
         <TextInput placeholder="Nome" className="bg-white p-4 rounded-2xl mb-2 border border-green-200" value={nomeColab} onChangeText={setNomeColab} />
@@ -102,9 +114,10 @@ export default function ConfiguracaoNegocio({ navigation }) {
         ))}
       </View>
 
+      {/* BLOCO: CUSTOS FIXOS COM LIXEIRINHA */}
       <View className="bg-blue-50 p-5 rounded-3xl mb-10 border border-blue-100">
-        <Text className="font-bold text-blue-800 mb-4">Custos Fixos (Luz, Aluguel...)</Text>
-        <TextInput placeholder="Nome" className="bg-white p-4 rounded-2xl mb-2 border border-blue-200" value={nomeCusto} onChangeText={setNomeCusto} />
+        <Text className="font-bold text-blue-800 mb-4">Custos Fixos da Operação</Text>
+        <TextInput placeholder="Ex: Aluguel" className="bg-white p-4 rounded-2xl mb-2 border border-blue-200" value={nomeCusto} onChangeText={setNomeCusto} />
         <TextInput placeholder="Valor (R$)" keyboardType="numeric" className="bg-white p-4 rounded-2xl mb-4 border border-blue-200" value={valorCusto} onChangeText={(v) => setValorCusto(v.replace(/[^0-9.]/g, ''))} />
         <TouchableOpacity className="bg-blue-600 p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeCusto, valorCusto, listaCustosFixos, setListaCustosFixos, () => {setNomeCusto(''); setValorCusto('')})}>
           <Text className="text-white text-center font-bold">ADICIONAR CUSTO</Text>
@@ -127,7 +140,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
         className="bg-black p-6 rounded-3xl mb-16 shadow-xl" 
         onPress={() => navigation.navigate('DespesasFixas')}
       >
-        <Text className="text-white text-center font-black text-lg">AVANÇAR</Text>
+        <Text className="text-white text-center font-black text-lg">CONFIGURAR DESPESAS FIXAS</Text>
       </TouchableOpacity>
     </ScrollView>
   );

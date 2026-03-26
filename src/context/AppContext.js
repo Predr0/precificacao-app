@@ -4,14 +4,14 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const removerItem = (id, lista, setLista) => {
-  setLista(lista.filter(item => item.id !== id));
-};
-  const [config, setConfig] = useState({ salario: '', dias: '', horas: '', lucroDesejado: '30' });
+    setLista(lista.filter(item => item.id !== id));
+  };
+
+  const [config, setConfig] = useState({ salario: '', dias: '', horas: '', tempoProducao: '', lucroDesejado: '30' });
   const [insumos, setInsumos] = useState([]);
   const [listaCustosFixos, setListaCustosFixos] = useState([]);
   const [listaColaboradores, setListaColaboradores] = useState([]);
   const [unidades, setUnidades] = useState(['unid', 'kg', 'g', 'm', 'cm']);
-
   const [listaDespesasFixas, setListaDespesasFixas] = useState([]);
   const [listaDespesasVariaveis, setListaDespesasVariaveis] = useState([]);
 
@@ -30,7 +30,8 @@ export const AppProvider = ({ children }) => {
       listaDespesasFixas, setListaDespesasFixas,
       listaDespesasVariaveis, setListaDespesasVariaveis,
       unidades, setUnidades,
-      totalCF_Mensal, totalDF_Mensal, totalDV_Mensal
+      totalCF_Mensal, totalDF_Mensal, totalDV_Mensal,
+      removerItem 
     }}>
       {children}
     </AppContext.Provider>

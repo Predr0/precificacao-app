@@ -1,72 +1,60 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { AppContext } from '../context/AppContext';
 
 export default function Insumos({ navigation }) {
-  const { insumos, setInsumos, unidades, setUnidades } = useContext(AppContext);
-  const [item, setItem] = useState({ nome: '', preco: '', unidade: 'unid', qtdTotal: '', qtdUso: '' });
-  const [novaUnidade, setNovaUnidade] = useState('');
+  const { insumos, setInsumos, removerItem } = useContext(AppContext);
+  const [nome, setNome] = useState('');
+  const [preco, setPreco] = useState('');
+  const [qtdE, setQtdE] = useState('');
+  const [qtdU, setQtdU] = useState('');
 
-  const addNovaMedida = () => {
-    if (novaUnidade.trim() === '') return;
-    if (!unidades.includes(novaUnidade.toLowerCase())) {
-      setUnidades([...unidades, novaUnidade.toLowerCase()]);
-      setItem({...item, unidade: novaUnidade.toLowerCase()});
-      setNovaUnidade('');
-    } else {
-      Alert.alert("Aviso", "Esta unidade já existe.");
-    }
-  };
-
-  const salvarInsumo = () => {
-    if (!item.nome || !item.preco || !item.qtdTotal || !item.qtdUso) {
-      Alert.alert("Erro", "Preencha todos os campos numéricos.");
+  const adicionar = () => {
+    if (!nome || !preco || !qtdE || !qtdU) {
+      Alert.alert("Erro", "Preencha a ficha técnica do insumo.");
       return;
     }
-    const custoFração = (parseFloat(item.preco) / parseFloat(item.qtdTotal)) * parseFloat(item.qtdUso);
-    setInsumos([...insumos, { ...item, custoFração }]);
-    setItem({ nome: '', preco: '', unidade: 'unid', qtdTotal: '', qtdUso: '' });
+    const custoFração = (parseFloat(preco) / parseFloat(qtdE)) * parseFloat(qtdU);
+    
+    setInsumos([...insumos, { 
+      id: Date.now().toString(), 
+      nome, 
+      custoFração 
+    }]);
+    
+    setNome(''); setPreco(''); setQtdE(''); setQtdU('');
   };
 
   return (
     <ScrollView className="flex-1 bg-white p-6">
-      <Text className="text-xl font-bold mb-4">Cadastro de Materiais (Custos Variáveis)</Text>
-
-      <View className="flex-row mb-4">
-        <TextInput placeholder="Nova Unidade (ex: kw)" className="bg-gray-100 p-3 rounded-l-lg flex-1" value={novaUnidade} onChangeText={setNovaUnidade} />
-        <TouchableOpacity className="bg-gray-800 p-3 rounded-r-lg justify-center" onPress={addNovaMedida}>
-          <Text className="text-white font-bold">ADD MEDIDA</Text>
+      <Text className="text-2xl font-black text-purple-900 mb-6">Insumos (Custo Variável)</Text>
+      
+      <View className="bg-purple-50 p-5 rounded-3xl mb-6 border border-purple-100">
+        <TextInput placeholder="Nome do Material" className="bg-white p-4 rounded-2xl mb-2" value={nome} onChangeText={setNome} />
+        <TextInput placeholder="Preço da Embalagem (R$)" keyboardType="numeric" className="bg-white p-4 rounded-2xl mb-2" value={preco} onChangeText={setPreco} />
+        <View className="flex-row justify-between">
+          <TextInput placeholder="Qtd Embalagem" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdE} onChangeText={setQtdE} />
+          <TextInput placeholder="Qtd Usada" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdU} onChangeText={setQtdU} />
+        </View>
+        <TouchableOpacity className="bg-purple-700 p-4 rounded-2xl mt-4" onPress={adicionar}>
+          <Text className="text-white text-center font-bold">ADICIONAR INSUMO</Text>
         </TouchableOpacity>
       </View>
 
-      <View className="bg-blue-50 p-4 rounded-2xl mb-6">
-        <TextInput placeholder="Nome do Material" className="bg-white p-3 rounded-lg mb-2" value={item.nome} onChangeText={(v) => setItem({...item, nome: v})} />
-        <View className="flex-row justify-between mb-2">
-          <TextInput placeholder="Preço (R$)" keyboardType="numeric" className="bg-white p-3 rounded-lg w-[48%]" value={item.preco} onChangeText={(v) => setItem({...item, preco: v.replace(/[^0-9.]/g, '')})} />
-          <View className="bg-white rounded-lg w-[48%] justify-center">
-            <Picker selectedValue={item.unidade} onValueChange={(v) => setItem({...item, unidade: v})}>
-              {unidades.map(u => <Picker.Item key={u} label={u} value={u} />)}
-            </Picker>
+      {insumos.map(item => (
+        <View key={item.id} className="flex-row justify-between items-center bg-gray-50 p-4 rounded-2xl mb-2 border border-gray-100">
+          <View>
+            <Text className="text-gray-700 font-medium">{item.nome}</Text>
+            <Text className="text-purple-900 font-bold">Custo: R$ {item.custoFração.toFixed(2)}</Text>
           </View>
-        </View>
-        <View className="flex-row justify-between mb-4">
-          <TextInput placeholder="Qtd Embalagem" keyboardType="numeric" className="bg-white p-3 rounded-lg w-[48%]" value={item.qtdTotal} onChangeText={(v) => setItem({...item, qtdTotal: v.replace(/[^0-9.]/g, '')})} />
-          <TextInput placeholder="Qtd Utilizada" keyboardType="numeric" className="bg-white p-3 rounded-lg w-[48%]" value={item.qtdUso} onChangeText={(v) => setItem({...item, qtdUso: v.replace(/[^0-9.]/g, '')})} />
-        </View>
-        <TouchableOpacity className="bg-blue-800 p-4 rounded-xl" onPress={salvarInsumo}>
-          <Text className="text-white text-center font-bold">SALVAR MATERIAL</Text>
-        </TouchableOpacity>
-      </View>
-
-      {insumos.map((ins, i) => (
-        <View key={i} className="p-3 border-b border-gray-100">
-          <Text>{ins.nome}: R$ {ins.custoFração.toFixed(2)}</Text>
+          <TouchableOpacity onPress={() => removerItem(item.id, insumos, setInsumos)}>
+            <Text className="text-lg">🗑️</Text>
+          </TouchableOpacity>
         </View>
       ))}
 
-      <TouchableOpacity className="bg-green-600 p-5 rounded-2xl mt-6 mb-10" onPress={() => navigation.navigate('DespesasVariaveis')}>
-        <Text className="text-white text-center font-bold">VER RESULTADO FINAL</Text>
+      <TouchableOpacity className="bg-green-700 p-6 rounded-3xl mt-6 mb-10 shadow-lg" onPress={() => navigation.navigate('CalculoProduto')}>
+        <Text className="text-white text-center font-black text-lg">VER RESULTADO FINAL</Text>
       </TouchableOpacity>
     </ScrollView>
   );
