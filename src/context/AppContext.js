@@ -3,6 +3,9 @@ import React, { createContext, useState } from 'react';
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  const removerItem = (id, lista, setLista) => {
+  setLista(lista.filter(item => item.id !== id));
+};
   const [config, setConfig] = useState({ salario: '', dias: '', horas: '', lucroDesejado: '30' });
   const [insumos, setInsumos] = useState([]);
   const [listaCustosFixos, setListaCustosFixos] = useState([]);
