@@ -31,10 +31,10 @@ export default function Insumos({ navigation }) {
       
       <View className="bg-purple-50 p-5 rounded-3xl mb-6 border border-purple-100">
         <TextInput placeholder="Nome do Material" className="bg-white p-4 rounded-2xl mb-2" value={nome} onChangeText={setNome} />
-        <TextInput placeholder="Preço da Embalagem (R$)" keyboardType="numeric" className="bg-white p-4 rounded-2xl mb-2" value={preco} onChangeText={setPreco} />
+        <TextInput placeholder="Preço da Embalagem (R$)" keyboardType="default" className="bg-white p-4 rounded-2xl mb-2" value={preco} onChangeText={setPreco} />
         <View className="flex-row justify-between">
-          <TextInput placeholder="Qtd Embalagem" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdE} onChangeText={setQtdE} />
-          <TextInput placeholder="Qtd Usada" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdU} onChangeText={setQtdU} />
+          <TextInput placeholder="Qtd Embalagem" keyboardType="default" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdE} onChangeText={setQtdE} />
+          <TextInput placeholder="Qtd Usada" keyboardType="default" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdU} onChangeText={setQtdU} />
         </View>
         <TouchableOpacity className="bg-purple-700 p-4 rounded-2xl mt-4" onPress={adicionar}>
           <Text className="text-white text-center font-bold">ADICIONAR INSUMO</Text>
