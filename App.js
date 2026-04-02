@@ -11,6 +11,7 @@ import CalculoProduto from './src/screens/CalculoProduto';
 import DespesasFixas from './src/screens/DespesasFixas';
 import DespesasVariaveis from './src/screens/DespesasVariaveis';
 import RelatoriosScreen from './src/screens/relatorioScreen';
+import PlanoNegocioScreen from './src/screens/PlanoNegocioScreen';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
             component={HomeScreen} 
             options={{ headerShown: false }} 
           />
+          
           <Stack.Screen 
             name="ConfiguracaoNegocio" 
             component={ConfiguracaoNegocio} 
@@ -54,6 +56,11 @@ export default function App() {
             component={RelatoriosScreen} 
             options={{ title: 'Relatórios Estratégicos' }} 
           />
+          <Stack.Screen 
+            name="PlanoNegocio" 
+            component={PlanoNegocioScreen} 
+            options={{ title: 'Plano de Negócio' }} 
+/>
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>
