@@ -21,9 +21,10 @@ export default function Insumos({ navigation }) {
       Alert.alert("Erro", "Preencha a ficha técnica completa.");
       return;
     }
-    const p = parseFloat(preco.replace(',', '.'));
-    const qE = parseFloat(qtdE.replace(',', '.'));
-    const qU = parseFloat(qtdU.replace(',', '.'));
+    
+    const p = parseFloat(preco);
+    const qE = parseFloat(qtdE);
+    const qU = parseFloat(qtdU);
     
     const custoFração = (p / qE) * qU;
     
@@ -43,27 +44,64 @@ export default function Insumos({ navigation }) {
       <Text style={{ color: roxo }} className="text-2xl font-black mb-6 uppercase">Insumos (Custos Variáveis)</Text>
       
       <View className="bg-purple-50 p-6 rounded-[40px] mb-8 border border-purple-100">
-        <TextInput placeholder="Material (ex: Energia, Farinha)" className="bg-white p-4 rounded-2xl mb-3" value={nome} onChangeText={setNome} />
-        <TextInput placeholder="Preço Pago (R$)" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-3" value={preco} onChangeText={setPreco} />
+        <TextInput 
+          placeholder="Material (ex: Energia, Farinha)" 
+          className="bg-white p-4 rounded-2xl mb-3" 
+          value={nome} 
+          onChangeText={setNome} 
+        />
+        <TextInput 
+          placeholder="Preço Pago (R$)" 
+          keyboardType="decimal-pad" 
+          className="bg-white p-4 rounded-2xl mb-3" 
+          value={preco} 
+          onChangeText={(v) => setPreco(v.replace(',', '.').replace(/[^0-9.]/g, ''))} 
+        />
         
         <View className="flex-row justify-between mb-4">
-          <TextInput placeholder="Qtd Total" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdE} onChangeText={setQtdE} />
-          <TextInput placeholder="Qtd Usada" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl w-[48%]" value={qtdU} onChangeText={setQtdU} />
+          <TextInput 
+            placeholder="Qtd Total" 
+            keyboardType="decimal-pad" 
+            className="bg-white p-4 rounded-2xl w-[48%]" 
+            value={qtdE} 
+            onChangeText={(v) => setQtdE(v.replace(',', '.').replace(/[^0-9.]/g, ''))} 
+          />
+          <TextInput 
+            placeholder="Qtd Usada" 
+            keyboardType="decimal-pad" 
+            className="bg-white p-4 rounded-2xl w-[48%]" 
+            value={qtdU} 
+            onChangeText={(v) => setQtdU(v.replace(',', '.').replace(/[^0-9.]/g, ''))} 
+          />
         </View>
 
         <Text className="text-[10px] font-black text-purple-900 mb-2 ml-1 uppercase">Unidade de Medida Personalizada</Text>
         <View className="flex-row flex-wrap gap-2 mb-4">
           {['unid', 'kg', 'g', 'ml', 'L'].map(m => (
-            <TouchableOpacity key={m} onPress={() => setUnidade(m)} style={{ backgroundColor: unidade === m ? roxo : 'white' }} className="px-4 py-2 rounded-full border border-purple-200">
+            <TouchableOpacity 
+              key={m} 
+              onPress={() => setUnidade(m)} 
+              style={{ backgroundColor: unidade === m ? roxo : 'white' }} 
+              className="px-4 py-2 rounded-full border border-purple-200"
+            >
               <Text style={{ color: unidade === m ? 'white' : roxo }} className="font-bold text-xs">{m}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity onPress={() => setModalVisible(true)} className="px-4 py-2 rounded-full bg-white border border-dashed border-purple-400">
-            <Text style={{ color: roxo }} className="font-bold text-xs">+ {unidade === 'unid' || ['kg','g','ml','L'].includes(unidade) ? 'Personalizar' : unidade}</Text>
+          <TouchableOpacity 
+            onPress={() => setModalVisible(true)} 
+            className="px-4 py-2 rounded-full bg-white border border-dashed border-purple-400"
+          >
+            <Text style={{ color: roxo }} className="font-bold text-xs">
+              + {unidade === 'unid' || ['kg','g','ml','L'].includes(unidade) ? 'Personalizar' : unidade}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={{ backgroundColor: roxo }} className="p-5 rounded-2xl flex-row justify-center items-center" onPress={adicionarInsumo}>
+        <TouchableOpacity 
+          style={{ backgroundColor: roxo }} 
+          className="p-5 rounded-2xl flex-row justify-center items-center" 
+          onPress={adicionarInsumo}
+        >
           <MaterialCommunityIcons name="plus-circle" size={20} color="white" />
           <Text className="text-white font-black ml-2">ADICIONAR MATERIAL</Text>
         </TouchableOpacity>
@@ -82,7 +120,10 @@ export default function Insumos({ navigation }) {
         </View>
       ))}
 
-      <TouchableOpacity className="bg-green-700 p-6 rounded-[35px] mt-6 mb-20 shadow-lg" onPress={() => navigation.navigate('relatorioScreen')}>
+      <TouchableOpacity 
+        className="bg-green-700 p-6 rounded-[35px] mt-6 mb-20 shadow-lg" 
+        onPress={() => navigation.navigate('relatorioScreen')}
+      >
         <Text className="text-white text-center font-black text-lg uppercase">Gerar Relatórios Finais</Text>
       </TouchableOpacity>
 
@@ -90,8 +131,18 @@ export default function Insumos({ navigation }) {
         <View className="flex-1 justify-center bg-black/50 p-6">
           <View className="bg-white p-8 rounded-[40px]">
             <Text style={{ color: roxo }} className="font-black text-lg mb-4 text-center">Defina sua Unidade (ex: Kilowatt)</Text>
-            <TextInput placeholder="Digite a unidade aqui..." className="bg-gray-100 p-4 rounded-2xl mb-6 text-center" value={novaUnidade} onChangeText={setNovaUnidade} autoFocus />
-            <TouchableOpacity style={{ backgroundColor: roxo }} className="p-4 rounded-2xl" onPress={() => { setUnidade(novaUnidade); setModalVisible(false); }}>
+            <TextInput 
+              placeholder="Digite a unidade aqui..." 
+              className="bg-gray-100 p-4 rounded-2xl mb-6 text-center" 
+              value={novaUnidade} 
+              onChangeText={setNovaUnidade} 
+              autoFocus 
+            />
+            <TouchableOpacity 
+              style={{ backgroundColor: roxo }} 
+              className="p-4 rounded-2xl" 
+              onPress={() => { setUnidade(novaUnidade); setModalVisible(false); }}
+            >
               <Text className="text-white text-center font-bold uppercase">Confirmar Unidade</Text>
             </TouchableOpacity>
           </View>

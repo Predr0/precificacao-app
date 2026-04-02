@@ -21,8 +21,19 @@ export default function DespesasVariaveis({ navigation }) {
       <Text className="text-2xl font-black text-orange-800 mb-6">Despesas Variáveis (RF08)</Text>
       
       <View className="bg-orange-50 p-5 rounded-3xl mb-6 border border-orange-100">
-        <TextInput placeholder="Nome (Ex: Gasolina, Frete)" className="bg-white p-4 rounded-2xl mb-2 border border-orange-200" value={nome} onChangeText={setNome} />
-        <TextInput placeholder="Valor Mensal (R$)" keyboardType="default" className="bg-white p-4 rounded-2xl mb-4 border border-orange-200" value={valor} onChangeText={(v) => setValor(v.replace(/[^0-9.]/g, ''))} />
+        <TextInput 
+          placeholder="Nome (Ex: Gasolina, Frete)" 
+          className="bg-white p-4 rounded-2xl mb-2 border border-orange-200" 
+          value={nome} 
+          onChangeText={setNome} 
+        />
+        <TextInput 
+          placeholder="Valor Mensal (R$)" 
+          keyboardType="decimal-pad" 
+          className="bg-white p-4 rounded-2xl mb-4 border border-orange-200" 
+          value={valor} 
+          onChangeText={(v) => setValor(v.replace(',', '.').replace(/[^0-9.]/g, ''))} 
+        />
         <TouchableOpacity className="bg-orange-600 p-4 rounded-2xl" onPress={adicionar}>
           <Text className="text-white text-center font-bold">ADICIONAR DESPESA VAR.</Text>
         </TouchableOpacity>

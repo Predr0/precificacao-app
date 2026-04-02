@@ -42,10 +42,10 @@ export default function ConfiguracaoNegocio({ navigation }) {
         <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Seu Salário Mensal Desejado (R$)</Text>
         <TextInput 
           placeholder="Ex: 5000"
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
           className="bg-white p-4 rounded-2xl mb-4 border border-gray-200 font-bold text-blue-800"
           value={config.salario}
-          onChangeText={(v) => setConfig({...config, salario: v.replace(/[^0-9.]/g, '')})} 
+          onChangeText={(v) => setConfig({...config, salario: v.replace(',', '.').replace(/[^0-9.]/g, '')})} 
         />
         
         <View className="flex-row justify-between mb-4">
@@ -53,7 +53,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
             <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Dias p/ mês</Text>
             <TextInput 
               placeholder="Ex: 22"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               className="bg-white p-4 rounded-2xl border border-gray-200 text-center font-bold"
               value={config.dias}
               onChangeText={(v) => setConfig({...config, dias: v.replace(/[^0-9]/g, '')})}
@@ -63,7 +63,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
             <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Horas p/ dia</Text>
             <TextInput 
               placeholder="Ex: 8"
-              keyboardType="default"
+              keyboardType="decimal-pad"
               className="bg-white p-4 rounded-2xl border border-gray-200 text-center font-bold"
               value={config.horas}
               onChangeText={(v) => setConfig({...config, horas: v.replace(/[^0-9]/g, '')})}
@@ -74,7 +74,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
         <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Tempo de Produção Unitário (Minutos)</Text>
         <TextInput 
           placeholder="Ex: 30"
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
           className="bg-white p-4 rounded-2xl border border-gray-200 font-bold text-purple-700 mb-4"
           value={config.tempoProducao}
           onChangeText={(v) => setConfig({...config, tempoProducao: v.replace(/[^0-9]/g, '')})}
@@ -83,17 +83,17 @@ export default function ConfiguracaoNegocio({ navigation }) {
         <Text className="text-xs font-bold text-gray-500 mb-1 ml-1">Margem de Lucro Desejada (%)</Text>
         <TextInput 
           placeholder="Ex: 30"
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
           className="bg-white p-4 rounded-2xl border border-gray-200 font-bold text-green-700"
           value={config.lucroDesejado}
-          onChangeText={(v) => setConfig({...config, lucroDesejado: v.replace(/[^0-9.]/g, '')})}
+          onChangeText={(v) => setConfig({...config, lucroDesejado: v.replace(',', '.').replace(/[^0-9.]/g, '')})}
         />
       </View>
 
       <View className="bg-green-50 p-5 rounded-3xl mb-6 border border-green-100">
         <Text className="font-bold text-green-800 mb-4">Colaboradores Fixos</Text>
         <TextInput placeholder="Nome" className="bg-white p-4 rounded-2xl mb-2 border border-green-200" value={nomeColab} onChangeText={setNomeColab} />
-        <TextInput placeholder="Salário (R$)" keyboardType="numeric" className="bg-white p-4 rounded-2xl mb-4 border border-green-200" value={salarioColab} onChangeText={(v) => setSalarioColab(v.replace(/[^0-9.]/g, ''))} />
+        <TextInput placeholder="Salário (R$)" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-4 border border-green-200" value={salarioColab} onChangeText={(v) => setSalarioColab(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
         <TouchableOpacity className="bg-green-600 p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeColab, salarioColab, listaColaboradores, setListaColaboradores, () => {setNomeColab(''); setSalarioColab('')})}>
           <Text className="text-white text-center font-bold">CADASTRAR COLABORADOR</Text>
         </TouchableOpacity>
@@ -114,7 +114,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
       <View className="bg-blue-50 p-5 rounded-3xl mb-10 border border-blue-100">
         <Text className="font-bold text-blue-800 mb-4">Custos Fixos da Operação</Text>
         <TextInput placeholder="Ex: Aluguel" className="bg-white p-4 rounded-2xl mb-2 border border-blue-200" value={nomeCusto} onChangeText={setNomeCusto} />
-        <TextInput placeholder="Valor (R$)" keyboardType="default" className="bg-white p-4 rounded-2xl mb-4 border border-blue-200" value={valorCusto} onChangeText={(v) => setValorCusto(v.replace(/[^0-9.]/g, ''))} />
+        <TextInput placeholder="Valor (R$)" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-4 border border-blue-200" value={valorCusto} onChangeText={(v) => setValorCusto(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
         <TouchableOpacity className="bg-blue-600 p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeCusto, valorCusto, listaCustosFixos, setListaCustosFixos, () => {setNomeCusto(''); setValorCusto('')})}>
           <Text className="text-white text-center font-bold">ADICIONAR CUSTO</Text>
         </TouchableOpacity>
