@@ -122,7 +122,7 @@ export default function Insumos({ navigation }) {
 
       <TouchableOpacity 
         className="bg-green-700 p-6 rounded-[35px] mt-6 mb-20 shadow-lg" 
-        onPress={() => navigation.navigate('relatorioScreen')}
+        onPress={() => navigation.navigate('CalculoProduto')}
       >
         <Text className="text-white text-center font-black text-lg uppercase">Gerar Relatórios Finais</Text>
       </TouchableOpacity>

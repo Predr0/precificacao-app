@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 
 export default function HomeScreen({ navigation }) {
@@ -31,60 +31,74 @@ export default function HomeScreen({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={{ backgroundColor: lavanda }} className="flex-1">
-      <ScrollView className="flex-1 p-6">
-        
-        <View className="mb-10 mt-6 flex-row justify-between items-center">
+    <SafeAreaView style={{ backgroundColor: lavanda, flex: 1 }}>
+      <ScrollView 
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 60 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="mb-8 mt-6 flex-row justify-between items-center">
           <View>
-            <Text className="text-white/70 font-bold uppercase text-[10px] tracking-widest">Seja bem-vinda ao (nome do aplicativo)</Text>
-            <Text className="text-white text-4xl font-black">Annik</Text>
+            <Text className="text-white/70 font-bold uppercase text-[9px] tracking-widest">Seja bem-vinda ao Annik</Text>
+            <Text className="text-white text-5xl font-black italic">Annik</Text>
           </View>
           <TouchableOpacity className="bg-white/20 p-3 rounded-full border border-white/30">
             <MaterialCommunityIcons name="face-woman-outline" size={28} color="white" />
           </TouchableOpacity>
         </View>
 
-        <MenuCard 
-          title="Meu Plano de Negócio" 
-          icon="briefcase-edit-outline" 
-          fullWidth 
-          onPress={() => navigation.navigate('PlanoNegocio')}
+        <View 
+          style={{ borderColor: 'rgba(255, 255, 255, 0.4)', borderStyle: 'solid' }}
+          className="border-2 p-6 rounded-[60px]"
+        >
+          <MenuCard 
+            title="Meu Plano de Negócio" 
+            icon="briefcase-edit-outline" 
+            fullWidth 
+            onPress={() => navigation.navigate('PlanoNegocio')}
+          />
+
+          <View className="flex-row flex-wrap justify-between mt-2">
+            <MenuCard 
+              title="Precificação" 
+              icon="calculator-variant-outline" 
+              onPress={() => navigation.navigate('ConfiguracaoNegocio')} 
+            />
+            <MenuCard 
+              title="Relatórios" 
+              icon="newspaper-variant-outline" 
+              onPress={() => navigation.navigate('relatorioScreen')} 
+            />
+            <MenuCard 
+              title="Financeiro" 
+              icon="bank-outline" 
+              onPress={() => {}} 
+            />
+            <MenuCard 
+              title="Configurações" 
+              icon="cog-outline" 
+              onPress={() => {}} 
+            />
+          </View>
+
+          <View className="mt-8 mb-4 items-center">
+            <Text className="text-white/60 text-[9px] font-bold uppercase tracking-[2px] italic text-center leading-tight">
+              "A conexão entre negócios e{"\n"}empreendedoras"
+            </Text>
+            <View className="h-[2px] w-10 bg-white/30 mt-4 rounded-full" />
+          </View>
+        </View>
+
+        <Image
+          source={require('../../assets/logo/ass-horizontal1(branco).png')}
+          style={{
+            alignSelf: 'center',
+            marginTop: 70,
+            width: 250,
+            height: 70,
+            resizeMode: 'contain',
+          }}
         />
-
-        <View className="flex-row flex-wrap justify-between mt-2">
-          
-          <MenuCard 
-            title="Precificação" 
-            icon="calculator-variant-outline" 
-            onPress={() => navigation.navigate('ConfiguracaoNegocio')} 
-          />
-
-          <MenuCard 
-            title="Relatórios" 
-            icon="chart-timeline-variant-outline" 
-            onPress={() => navigation.navigate('relatorioScreen')} 
-          />
-
-          <MenuCard 
-            title="Financeiro" 
-            icon="bank-outline" 
-            onPress={() => {}} 
-          />
-
-          <MenuCard 
-            title="Configurações" 
-            icon="cog-outline" 
-            onPress={() => {}} 
-          />
-        </View>
-
-        <View className="mt-8 mb-20 items-center">
-          <Text className="text-white/60 text-[10px] font-bold uppercase tracking-widest italic text-center">
-            "Transformando sonhos em negócios viáveis"
-          </Text>
-          <View className="h-[2px] w-12 bg-white/30 mt-4 rounded-full" />
-        </View>
-
       </ScrollView>
     </SafeAreaView>
   );

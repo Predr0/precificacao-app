@@ -3,8 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AppProvider } from './src/context/AppContext';
 
-// Telas
-import HomeScreen from './src/screens/HomeScreen'; // Certifique-se de criar este arquivo
+import HomeScreen from './src/screens/HomeScreen';
 import ConfiguracaoNegocio from './src/screens/ConfiguracaoNegocio';
 import Insumos from './src/screens/Insumos';
 import CalculoProduto from './src/screens/CalculoProduto';
@@ -25,7 +24,6 @@ export default function App() {
             component={HomeScreen} 
             options={{ headerShown: false }} 
           />
-          
           <Stack.Screen 
             name="ConfiguracaoNegocio" 
             component={ConfiguracaoNegocio} 
@@ -60,7 +58,7 @@ export default function App() {
             name="PlanoNegocio" 
             component={PlanoNegocioScreen} 
             options={{ title: 'Plano de Negócio' }} 
-/>
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>
