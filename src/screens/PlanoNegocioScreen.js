@@ -12,7 +12,8 @@ export default function PlanoNegocioScreen({ navigation }) {
     segmento: config.segmento || '',
     descricao: config.descricao || '',
     propostaValor: config.propostaValor || '',
-    objetivo: config.objetivo || '',
+objetivoCurtoPrazo: config.objetivoCurtoPrazo || '', 
+    metaCurtoPrazo: config.metaCurtoPrazo || '',     
     contato: config.contato || '',
   });
 
@@ -71,7 +72,6 @@ export default function PlanoNegocioScreen({ navigation }) {
         
         <View className="mb-8">
           <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Identidade</Text>
-          <Text className="text-gray-400 font-bold text-xs uppercase">Construindo o futuro do seu negócio</Text>
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
@@ -143,6 +143,13 @@ export default function PlanoNegocioScreen({ navigation }) {
             value={dados.objetivo}
             onChangeText={(t) => setDados({...dados, objetivo: t})}
           />
+          <InputLabel
+          label="Metas a Curto Prazo"
+          icon="chart-line"
+          placeholder="Ex: Crescer 5% no faturamento em janeiro"
+          multilinevalue={dados.metaCurtoPrazo}
+          onChangeText={(t) => setDados({...dados, metaCurtoPrazo: t})   }
+        />
         </View>
 
         <TouchableOpacity 

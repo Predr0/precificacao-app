@@ -47,8 +47,8 @@ export default function HomeScreen({ navigation }) {
       >
         <View className="mb-8 flex-row justify-between items-center">
           <View>
-            <Text className="text-white/70 font-bold uppercase text-[9px] tracking-widest">Seja bem-vinda ao Annik</Text>
-            <Text className="text-white text-5xl font-black italic">Annik</Text>
+            <Text className="text-white/70 font-bold uppercase text-[12px] tracking-widest">Seja bem-vinda ao Conecta Valor</Text>
+            <Text className="text-white text-4xl font-black italic">Annik</Text>
           </View>
           <TouchableOpacity className="bg-white/20 p-3 rounded-full border border-white/30">
             <MaterialCommunityIcons name="face-woman-outline" size={28} color="white" />
