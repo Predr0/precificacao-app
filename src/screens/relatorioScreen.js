@@ -76,7 +76,7 @@ export default function RelatoriosScreen() {
         
         <View className="mb-8 flex-row justify-between items-center">
           <View>
-            <Text style={{ color: roxo }} className="text-2xl font-black uppercase">Relatório</Text>
+            <Text style={{ color: roxo }} className="text-2xl font-black uppercase">Gestão de Gastos</Text>
             <Text className="text-gray-400 font-bold text-[10px] uppercase">Dados Dinâmicos do Negócio</Text>
           </View>
           {exibirRelatorio && (

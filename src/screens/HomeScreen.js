@@ -73,17 +73,17 @@ export default function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate('ConfiguracaoNegocio')} 
             />
             <MenuCard 
-              title="Relatórios" 
+              title="Gestão de Gastos" 
               icon="newspaper-variant-outline" 
               onPress={() => navigation.navigate('relatorioScreen')} 
             />
             <MenuCard 
-              title="Financeiro" 
+              title="Projeções de Vendas" 
               icon="bank-outline" 
               onPress={() => {}} 
             />
             <MenuCard 
-              title="Configurações" 
+              title="Instruções" 
               icon="cog-outline" 
               onPress={() => {}} 
             />
