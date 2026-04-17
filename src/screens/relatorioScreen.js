@@ -101,7 +101,7 @@ export default function RelatoriosScreen() {
       >
         <View className="mb-8 flex-row justify-between items-end">
           <View>
-            <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Annik Reports</Text>
+            <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Relatórios</Text>
             <Text className="text-gray-400 font-bold text-[10px] uppercase">Gestão e Performance</Text>
           </View>
           <MaterialCommunityIcons name="finance" size={32} color={roxo} />

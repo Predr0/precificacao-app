@@ -1,9 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, useWindowDimensions } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, useWindowDimensions, Alert } from 'react-native'; // Adicionado Alert aqui
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { AppContext } from '../context/AppContext';
 
 export default function HomeScreen({ navigation }) {
   const { height, width } = useWindowDimensions();
+  const { popularDadosTeste } = useContext(AppContext); 
   const lavanda = '#9e86bd'; 
   const roxoProfundo = '#4d235e'; 
 
@@ -50,7 +52,15 @@ export default function HomeScreen({ navigation }) {
             <Text className="text-white/70 font-bold uppercase text-[12px] tracking-widest">Seja bem-vinda ao Conecta Valor</Text>
             <Text className="text-white text-4xl font-black italic">Annik</Text>
           </View>
-          <TouchableOpacity className="bg-white/20 p-3 rounded-full border border-white/30">
+          
+          {/* BOTÃO CORRIGIDO: Tudo dentro da tag de abertura */}
+          <TouchableOpacity 
+            onPress={() => {
+              popularDadosTeste();
+              Alert.alert("Sucesso", "Dados de teste carregados!");
+            }}
+            className="bg-white/20 p-3 rounded-full border border-white/30"
+          >
             <MaterialCommunityIcons name="face-woman-outline" size={28} color="white" />
           </TouchableOpacity>
         </View>
@@ -80,7 +90,7 @@ export default function HomeScreen({ navigation }) {
             <MenuCard 
               title="Projeções de Vendas" 
               icon="bank-outline" 
-              onPress={() => {}} 
+              onPress={() => navigation.navigate('ProjecoesVendas')} 
             />
             <MenuCard 
               title="Instruções" 

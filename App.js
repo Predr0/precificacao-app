@@ -11,6 +11,7 @@ import DespesasFixas from './src/screens/DespesasFixas';
 import DespesasVariaveis from './src/screens/DespesasVariaveis';
 import RelatoriosScreen from './src/screens/relatorioScreen';
 import PlanoNegocioScreen from './src/screens/PlanoNegocioScreen';
+import ProjecaoVendasScreen from './src/screens/ProjecoesVendasScreen';
 
 const Stack = createStackNavigator();
 
@@ -28,6 +29,11 @@ export default function App() {
             name="ConfiguracaoNegocio" 
             component={ConfiguracaoNegocio} 
             options={{ title: 'Configurações' }} 
+          />
+          <Stack.Screen 
+            name="ProjecoesVendas" 
+            component={ProjecaoVendasScreen} 
+            options={{ title: 'Projeções de Vendas' }} 
           />
           <Stack.Screen 
             name="DespesasFixas" 
