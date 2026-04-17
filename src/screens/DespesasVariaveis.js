@@ -95,7 +95,7 @@ export default function DespesasVariaveis({ navigation }) {
           className="p-6 rounded-[35px] mb-20 shadow-xl flex-row justify-center items-center" 
           onPress={() => navigation.navigate('Insumos')}
         >
-          <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Próximo: Ficha Técnica Insumos</Text>
+          <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Próximo: Insumos</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

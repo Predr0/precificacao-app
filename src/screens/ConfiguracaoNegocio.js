@@ -185,7 +185,7 @@ export default function ConfiguracaoNegocio({ navigation }) {
           className="p-6 rounded-[35px] mb-20 shadow-xl flex-row justify-center items-center" 
           onPress={() => navigation.navigate('DespesasFixas')}
         >
-          <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Avançar para Despesas</Text>
+          <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Avançar para Despesas Fixas</Text>
           <MaterialCommunityIcons name="chevron-right" size={20} color="white" className="ml-2" />
         </TouchableOpacity>
       </ScrollView>
