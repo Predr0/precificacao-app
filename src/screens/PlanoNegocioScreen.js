@@ -139,7 +139,7 @@ objetivoCurtoPrazo: config.objetivoCurtoPrazo || '',
           <InputLabel 
             label="Objetivo a Curto Prazo" 
             icon="target"
-            placeholder="Ex: Alcançar 50 vendas por mês"
+            placeholder="Aumentar as vendas a cada mês"
             value={dados.objetivo}
             onChangeText={(t) => setDados({...dados, objetivo: t})}
           />

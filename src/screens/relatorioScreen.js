@@ -126,7 +126,7 @@ export default function RelatoriosScreen() {
                   className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}
                 >
                   <Text style={{ color: abaAtiva === item ? roxo : '#9ca3af' }} className="text-center font-black text-[8px] uppercase">
-                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Formação Preço' : 'Margem/Rentab'}
+                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Formação Preço de Venda' : 'Margem/Rentab'}
                   </Text>
                 </TouchableOpacity>
               ))}

@@ -129,7 +129,7 @@ export default function ProjecaoVendasScreen() {
           </Text>
         </View>
 
-        <Text className="text-black-300 text-[10px] text-center mt-6 italic">
+        <Text className="text-black-300 text-[10x] text-center mt-6 italic">
           Os valores acima consideram todos os custos e despesas rateados por tempo de produção.
         </Text>
 

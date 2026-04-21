@@ -47,7 +47,7 @@ export default function DespesasVariaveis({ navigation }) {
           <View className="mb-6">
             <View className="flex-row items-center mb-2 ml-1">
               <MaterialCommunityIcons name="cash-fast" size={14} color={roxo} />
-              <Text style={{ color: roxo }} className="font-black text-[9px] uppercase ml-2 tracking-widest">Valor Médio Mensal (R$)</Text>
+              <Text style={{ color: roxo }} className="font-black text-[9px] uppercase ml-2 tracking-widest">Valor Mensal (R$)</Text>
             </View>
             <TextInput 
               placeholder="0.00" 

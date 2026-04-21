@@ -60,7 +60,7 @@ export default function CalculoProduto() {
 
   return (
     <ScrollView className="flex-1 bg-white p-6">
-      <Text className="text-2xl font-black text-green-700 mb-6 text-center">Relatório Final Annik</Text>
+      <Text className="text-2xl font-black text-green-700 mb-6 text-center">Relatório Final</Text>
       
       {/* CARD DO PREÇO MARK-UP */}
       <View className="bg-blue-600 p-8 rounded-[40px] mb-4 shadow-xl border-b-8 border-blue-800">
@@ -115,7 +115,6 @@ export default function CalculoProduto() {
         </View>
       </View>
 
-      {/* COMPOSIÇÃO PERCENTUAL RF10 */}
       <View className="bg-gray-100 p-6 rounded-3xl mb-12">
         <Text className="text-gray-500 uppercase text-xs font-bold mb-4">Composição do Preço (%)</Text>
         <View className="flex-row justify-between mb-2">
