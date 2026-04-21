@@ -132,7 +132,7 @@ export default function Insumos({ navigation }) {
             onPress={adicionarInsumo}
           >
             <MaterialCommunityIcons name="plus-circle" size={20} color="white" />
-            <Text className="text-white font-black text-xs uppercase ml-2">Cadastrar no Relatório</Text>
+            <Text className="text-white font-black text-xs uppercase ml-2">Cadastrar Insumo</Text>
           </TouchableOpacity>
         </View>
 

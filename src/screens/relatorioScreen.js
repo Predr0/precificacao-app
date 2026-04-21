@@ -213,10 +213,6 @@ export default function RelatoriosScreen() {
                 </View>
               </View>
             )}
-
-            <TouchableOpacity onPress={() => setExibirRelatorio(false)} className="items-center mb-20 bg-gray-100 p-4 rounded-full">
-              <Text className="text-gray-400 font-bold uppercase text-[10px]">Ajustar Informações</Text>
-            </TouchableOpacity>
           </View>
         )}
       </ScrollView>

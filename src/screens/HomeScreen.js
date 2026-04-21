@@ -49,7 +49,7 @@ export default function HomeScreen({ navigation }) {
       >
         <View className="mb-8 flex-row justify-between items-center">
           <View>
-            <Text className="text-white/70 font-bold uppercase text-[12px] tracking-widest">Seja bem-vinda ao Conecta Valor</Text>
+            <Text className="text-white/70 font-bold uppercase text-[12px] tracking-widest">Seja bem-vinda ao ConectaValor</Text>
             <Text className="text-white text-4xl font-black italic">Annik</Text>
           </View>
           
