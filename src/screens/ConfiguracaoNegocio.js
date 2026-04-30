@@ -3,17 +3,44 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Aler
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+// 1. MOVA AS CONSTANTES DE CORES PARA FORA
+const roxo = '#4d235e';
+const lavanda = '#9e86bd';
+
+// 2. MOVA O INPUTLABEL PARA FORA DA FUNÇÃO PRINCIPAL
+const InputLabel = ({ label, icon, placeholder, value, onChangeText, keyboardType = "decimal-pad", color = '#4d235e' }) => (
+  <View className="mb-4">
+    <View className="flex-row items-center mb-2 ml-1">
+      <MaterialCommunityIcons name={icon} size={14} color={roxo} />
+      <Text style={{ color: roxo }} className="font-black text-[9px] uppercase ml-2 tracking-widest">{label}</Text>
+    </View>
+    <TextInput
+      placeholder={placeholder}
+      placeholderTextColor="#CCC"
+      keyboardType={keyboardType}
+      style={{ borderColor: '#F0F0F0', backgroundColor: '#FFF', color: color }}
+      className="border-2 p-4 rounded-3xl font-bold shadow-sm"
+      value={value}
+      onChangeText={onChangeText}
+    />
+  </View>
+);
+
 export default function ConfiguracaoNegocio({ navigation }) {
   const { 
+    nomeProduto,
+    setNomeProduto,
     config, 
     setConfig, 
     listaCustosFixos, 
     setListaCustosFixos, 
     listaColaboradores, 
     setListaColaboradores,
-    removerItem 
+    removerItem,
+    salvarAlteracoes
   } = useContext(AppContext);
-  
+
+  // Estados locais para os formulários de adição
   const [nomeCusto, setNomeCusto] = useState('');
   const [valorCusto, setValorCusto] = useState('');
   const [nomeColab, setNomeColab] = useState('');
@@ -21,8 +48,14 @@ export default function ConfiguracaoNegocio({ navigation }) {
   const [diasColab, setDiasColab] = useState('');
   const [horasColab, setHorasColab] = useState('');
 
-  const roxo = '#4d235e';
-  const lavanda = '#9e86bd';
+  const handleAvancar = () => {
+    if (!nomeProduto || nomeProduto.trim() === '') {
+      Alert.alert("Erro", "Por favor, dê um nome ao produto.");
+      return;
+    }
+    salvarAlteracoes(); 
+    navigation.navigate('DespesasFixas');
+  };
 
   const validarEAdd = (nome, valor, lista, setLista, limpar) => {
     if (nome.trim() === '' || valor.trim() === '') {
@@ -55,31 +88,24 @@ export default function ConfiguracaoNegocio({ navigation }) {
     limpar();
   };
 
-  const InputLabel = ({ label, icon, placeholder, value, onChangeText, keyboardType = "decimal-pad", color = '#4d235e' }) => (
-    <View className="mb-4">
-      <View className="flex-row items-center mb-2 ml-1">
-        <MaterialCommunityIcons name={icon} size={14} color={roxo} />
-        <Text style={{ color: roxo }} className="font-black text-[9px] uppercase ml-2 tracking-widest">{label}</Text>
-      </View>
-      <TextInput
-        placeholder={placeholder}
-        placeholderTextColor="#CCC"
-        keyboardType={keyboardType}
-        style={{ borderColor: '#F0F0F0', backgroundColor: '#FFF', color: color }}
-        className="border-2 p-4 rounded-3xl font-bold shadow-sm"
-        value={value}
-        onChangeText={onChangeText}
-      />
-    </View>
-  );
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
         
         <View className="mb-8">
           <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Capacidade</Text>
-          <Text className="text-gray-400 font-bold text-xs uppercase">Parâmetros de Operação</Text>
+          <Text className="text-gray-400 font-bold text-xs uppercase">Configuração do Produto</Text>
+        </View>
+
+        <View className="mb-6">
+          <InputLabel 
+            label="Nome do Produto" 
+            icon="tag-outline"
+            placeholder="Ex: Vestido de Festa"
+            value={nomeProduto}
+            onChangeText={setNomeProduto}
+            keyboardType="default"
+          />
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
@@ -131,20 +157,20 @@ export default function ConfiguracaoNegocio({ navigation }) {
           />
         </View>
 
+        {/* ... Resto do código (Colaboradores e Custos Fixos) ... */}
+        {/* Lembre-se de manter o final do arquivo com o botão de avançar e o ScrollView */}
+        
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
           <Text style={{ color: lavanda }} className="font-black text-[10px] mb-4 uppercase tracking-widest ml-1">Colaboradores</Text>
           <TextInput placeholder="Nome" className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={nomeColab} onChangeText={setNomeColab} />
           <TextInput placeholder="Salário (R$)" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={salarioColab} onChangeText={(v) => setSalarioColab(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
-          
           <View className="flex-row justify-between mb-4">
             <TextInput placeholder="Dias trab/ mês" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%] border border-purple-100 font-bold text-center" value={diasColab} onChangeText={setDiasColab} />
             <TextInput placeholder="Horas trab/ dia" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%] border border-purple-100 font-bold text-center" value={horasColab} onChangeText={setHorasColab} />
           </View>
-
           <TouchableOpacity style={{ backgroundColor: roxo }} className="p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeColab, salarioColab, listaColaboradores, setListaColaboradores, () => {setNomeColab(''); setSalarioColab(''); setDiasColab(''); setHorasColab('')})}>
             <Text className="text-white text-center font-black text-xs uppercase">Cadastrar Colaborador</Text>
           </TouchableOpacity>
-          
           {listaColaboradores.map(c => (
             <View key={c.id} className="mt-3 p-4 bg-white rounded-2xl flex-row justify-between items-center border border-purple-100 shadow-sm">
               <View>
@@ -166,7 +192,6 @@ export default function ConfiguracaoNegocio({ navigation }) {
           <TouchableOpacity style={{ backgroundColor: roxo }} className="p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeCusto, valorCusto, listaCustosFixos, setListaCustosFixos, () => {setNomeCusto(''); setValorCusto('')})}>
             <Text className="text-white text-center font-black text-xs uppercase">Adicionar Custo</Text>
           </TouchableOpacity>
-          
           {listaCustosFixos.map(i => (
             <View key={i.id} className="mt-3 p-4 bg-white rounded-2xl flex-row justify-between items-center border border-purple-100 shadow-sm">
               <View>
@@ -183,11 +208,12 @@ export default function ConfiguracaoNegocio({ navigation }) {
         <TouchableOpacity 
           style={{ backgroundColor: roxo }}
           className="p-6 rounded-[35px] mb-20 shadow-xl flex-row justify-center items-center" 
-          onPress={() => navigation.navigate('DespesasFixas')}
+          onPress={handleAvancar}
         >
           <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Avançar para Despesas Fixas</Text>
           <MaterialCommunityIcons name="chevron-right" size={20} color="white" className="ml-2" />
         </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );

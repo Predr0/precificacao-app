@@ -3,6 +3,44 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Aler
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+const roxo = '#4d235e';
+const lavanda = '#9e86bd';
+
+const formatarCNPJ = (txt) => {
+  const limpo = txt.replace(/\D/g, '');
+  return limpo
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2')
+    .substring(0, 18);
+};
+
+const InputLabel = ({ label, icon, placeholder, value, onChangeText, multiline = false, keyboardType = 'default' }) => (
+  <View className="mb-5">
+    <View className="flex-row items-center mb-2 ml-1">
+      <MaterialCommunityIcons name={icon} size={16} color={roxo} />
+      <Text style={{ color: roxo }} className="font-black text-[10px] uppercase ml-2 tracking-widest">{label}</Text>
+    </View>
+    <TextInput
+      placeholder={placeholder}
+      placeholderTextColor="#CCC"
+      multiline={multiline}
+      keyboardType={keyboardType}
+      numberOfLines={multiline ? 3 : 1}
+      style={{ 
+        borderColor: '#F0F0F0', 
+        backgroundColor: '#FFF',
+        textAlignVertical: multiline ? 'top' : 'center',
+        minHeight: multiline ? 80 : 55
+      }}
+      className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm"
+      value={value}
+      onChangeText={onChangeText}
+    />
+  </View>
+);
+
 export default function PlanoNegocioScreen({ navigation }) {
   const { config, setConfig } = useContext(AppContext);
 
@@ -12,23 +50,10 @@ export default function PlanoNegocioScreen({ navigation }) {
     segmento: config.segmento || '',
     descricao: config.descricao || '',
     propostaValor: config.propostaValor || '',
-objetivoCurtoPrazo: config.objetivoCurtoPrazo || '', 
+    objetivoCurtoPrazo: config.objetivoCurtoPrazo || '', 
     metaCurtoPrazo: config.metaCurtoPrazo || '',     
     contato: config.contato || '',
   });
-
-  const roxo = '#4d235e';
-  const lavanda = '#9e86bd';
-
-  const formatarCNPJ = (txt) => {
-    const limpo = txt.replace(/\D/g, '');
-    return limpo
-      .replace(/^(\dt{2})(\dt)/, '$1.$2')
-      .replace(/^(\dt{2})\.(\dt{3})(\dt)/, '$1.$2.$3')
-      .replace(/\.(\dt{3})(\dt)/, '.$1/$2')
-      .replace(/(\dt{4})(\dt)/, '$1-$2')
-      .substring(0, 18);
-  };
 
   const salvar = () => {
     if (!dados.nomeNegocio) {
@@ -40,31 +65,6 @@ objetivoCurtoPrazo: config.objetivoCurtoPrazo || '',
       { text: "OK", onPress: () => navigation.goBack() }
     ]);
   };
-
-  const InputLabel = ({ label, icon, placeholder, value, onChangeText, multiline = false, keyboardType = 'default' }) => (
-    <View className="mb-5">
-      <View className="flex-row items-center mb-2 ml-1">
-        <MaterialCommunityIcons name={icon} size={16} color={roxo} />
-        <Text style={{ color: roxo }} className="font-black text-[10px] uppercase ml-2 tracking-widest">{label}</Text>
-      </View>
-      <TextInput
-        placeholder={placeholder}
-        placeholderTextColor="#CCC"
-        multiline={multiline}
-        keyboardType={keyboardType}
-        numberOfLines={multiline ? 3 : 1}
-        style={{ 
-          borderColor: '#F0F0F0', 
-          backgroundColor: '#FFF',
-          textAlignVertical: multiline ? 'top' : 'center',
-          minHeight: multiline ? 80 : 55
-        }}
-        className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm"
-        value={value}
-        onChangeText={onChangeText}
-      />
-    </View>
-  );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -140,16 +140,17 @@ objetivoCurtoPrazo: config.objetivoCurtoPrazo || '',
             label="Objetivo a Curto Prazo" 
             icon="target"
             placeholder="Aumentar as vendas a cada mês"
-            value={dados.objetivo}
-            onChangeText={(t) => setDados({...dados, objetivo: t})}
+            value={dados.objetivoCurtoPrazo}
+            onChangeText={(t) => setDados({...dados, objetivoCurtoPrazo: t})}
           />
           <InputLabel
-          label="Metas a Curto Prazo"
-          icon="chart-line"
-          placeholder="Ex: Crescer 5% no faturamento em janeiro"
-          multilinevalue={dados.metaCurtoPrazo}
-          onChangeText={(t) => setDados({...dados, metaCurtoPrazo: t})   }
-        />
+            label="Metas a Curto Prazo"
+            icon="chart-line"
+            placeholder="Ex: Crescer 5% no faturamento em janeiro"
+            multiline
+            value={dados.metaCurtoPrazo}
+            onChangeText={(t) => setDados({...dados, metaCurtoPrazo: t})}
+          />
         </View>
 
         <TouchableOpacity 

@@ -4,20 +4,33 @@ import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function RelatoriosScreen() {
-  const { 
-    config, insumos, listaCustosFixos, listaColaboradores, 
-    listaDespesasFixas, listaDespesasVariaveis,
-    totalCF_Mensal, totalDF_Mensal, totalDV_Mensal 
-  } = useContext(AppContext);
+  const { produtos } = useContext(AppContext);
   
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [abaAtiva, setAbaAtiva] = useState('geral');
-  const [exibirRelatorio, setExibirRelatorio] = useState(false);
   const { height } = useWindowDimensions();
 
   const roxo = '#4d235e';
   const lavanda = '#9e86bd';
 
-  const calcularTudo = () => {
+  // CÁLCULOS TÉCNICOS (IDÊNTICOS AO SEU, MAS USANDO O PRODUTO SELECIONADO)
+  const calcular = (p) => {
+    if (!p) return null;
+
+    const config = p.config;
+    const insumos = p.insumos;
+    const listaColaboradores = p.listaColaboradores;
+    const listaCustosFixos = p.listaCustosFixos;
+    const listaDespesasFixas = p.listaDespesasFixas;
+    const listaDespesasVariaveis = p.listaDespesasVariaveis;
+
+    const totalCF_Mensal = (parseFloat(config.salario) || 0) + 
+      listaColaboradores.reduce((acc, c) => acc + (parseFloat(c.salario) || 0), 0) +
+      listaCustosFixos.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+
+    const totalDF_Mensal = listaDespesasFixas.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+    const totalDV_Mensal = listaDespesasVariaveis.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+
     const dias = parseFloat(config.dias) || 1;
     const horas = parseFloat(config.horas) || 1;
     const tempoProd = parseFloat(config.tempoProducao) || 1;
@@ -61,11 +74,12 @@ export default function RelatoriosScreen() {
       pCF, pCV, pDF, pDV, markupIndice, 
       totalCF_Mensal, totalDF_Mensal, totalDV_Mensal, lucroDesejado,
       diferencaAbsoluta, ganhoPercentual, margemBrutaSem, margemBrutaCom,
-      margemBrutaPercSem, margemBrutaPercCom, somaCF_DF_DV, lucroFinalSem, lucroFinalCom
+      margemBrutaPercSem, margemBrutaPercCom, somaCF_DF_DV, lucroFinalSem, lucroFinalCom,
+      tempoProd, minutosTotaisMes: minMes
     };
   };
 
-  const r = calcularTudo();
+  const r = calcular(produtoSelecionado);
 
   const TabelaDinamica = ({ titulo, dados, valorTotal, labelTotal, cor }) => (
     <View className="mb-6 border border-gray-100 rounded-[30px] overflow-hidden bg-white shadow-sm">
@@ -95,27 +109,44 @@ export default function RelatoriosScreen() {
 
   return (
     <SafeAreaView style={{ backgroundColor: '#F9F9FF', flex: 1 }}>
-      <ScrollView 
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: height * 0.05, paddingBottom: 60 }}
-      >
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: height * 0.05, paddingBottom: 60 }}>
+        
         <View className="mb-8 flex-row justify-between items-end">
           <View>
             <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Relatórios</Text>
-            <Text className="text-gray-400 font-bold text-[10px] uppercase">Gestão e Performance</Text>
+            {produtoSelecionado && (
+                <Text style={{ color: roxo }} className="font-bold text-[10px] uppercase mt-1">
+                    Analisando: <Text className="font-black">{produtoSelecionado.nome}</Text>
+                </Text>
+            )}
           </View>
-          <MaterialCommunityIcons name="finance" size={32} color={roxo} />
+          {produtoSelecionado ? (
+              <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
+                  <MaterialCommunityIcons name="swap-horizontal" size={32} color={roxo} />
+              </TouchableOpacity>
+          ) : (
+              <MaterialCommunityIcons name="finance" size={32} color={roxo} />
+          )}
         </View>
 
-        {!exibirRelatorio ? (
-          <TouchableOpacity 
-            onPress={() => setExibirRelatorio(true)} 
-            style={{ backgroundColor: roxo }} 
-            className="p-10 rounded-[45px] items-center shadow-2xl"
-          >
-            <MaterialCommunityIcons name="finance" size={50} color="white" />
-            <Text className="text-white font-black mt-4 uppercase text-center">Processar Dados Atuais</Text>
-          </TouchableOpacity>
+        {!produtoSelecionado ? (
+          <View>
+            <Text className="text-gray-400 font-bold text-[10px] uppercase mb-4 ml-2">Selecione o produto para processar os dados:</Text>
+            {produtos.map((item) => (
+                <TouchableOpacity 
+                    key={item.id}
+                    onPress={() => setProdutoSelecionado(item)} 
+                    style={{ backgroundColor: roxo }} 
+                    className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between"
+                >
+                    <Text className="text-white font-black uppercase text-center">{item.nome}</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={24} color="white" />
+                </TouchableOpacity>
+            ))}
+            {produtos.length === 0 && (
+                <Text className="text-gray-400 text-center italic mt-10">Nenhum produto cadastrado.</Text>
+            )}
+          </View>
         ) : (
           <View>
             <View className="flex-row bg-gray-200 p-1 rounded-2xl mb-8">
@@ -134,10 +165,10 @@ export default function RelatoriosScreen() {
 
             {abaAtiva === 'geral' && (
               <View>
-                <TabelaDinamica titulo="Custos Fixos Mensais" dados={[...listaColaboradores, ...listaCustosFixos]} valorTotal={r.totalCF_Mensal} labelTotal="Total CF" cor={roxo} />
-                <TabelaDinamica titulo="Materiais (Insumos)" dados={insumos} valorTotal={r.CVR} labelTotal="Total CV Unidade" cor="#2D6A4F" />
-                <TabelaDinamica titulo="Despesas Fixas" dados={listaDespesasFixas} valorTotal={r.totalDF_Mensal} labelTotal="Total DF" cor="#1B4332" />
-                <TabelaDinamica titulo="Despesas Variáveis" dados={listaDespesasVariaveis} valorTotal={r.totalDV_Mensal} labelTotal="Total DV" cor="#D4A373" />
+                <TabelaDinamica titulo="Custos Fixos Mensais" dados={[...produtoSelecionado.listaColaboradores, ...produtoSelecionado.listaCustosFixos]} valorTotal={r.totalCF_Mensal} labelTotal="Total CF" cor={roxo} />
+                <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total CV Unidade" cor="#2D6A4F" />
+                <TabelaDinamica titulo="Despesas Fixas" dados={produtoSelecionado.listaDespesasFixas} valorTotal={r.totalDF_Mensal} labelTotal="Total DF" cor="#1B4332" />
+                <TabelaDinamica titulo="Despesas Variáveis" dados={produtoSelecionado.listaDespesasVariaveis} valorTotal={r.totalDV_Mensal} labelTotal="Total DV" cor="#D4A373" />
 
                 <View className="bg-white border border-gray-200 rounded-[35px] overflow-hidden mb-8 shadow-sm">
                   <View style={{ backgroundColor: '#F2F2F2' }} className="p-4"><Text className="font-black text-[10px] uppercase">Motor de Precificação</Text></View>
@@ -212,7 +243,7 @@ export default function RelatoriosScreen() {
                   </Text>
                 </View>
               </View>
-            )}
+            )}  
           </View>
         )}
       </ScrollView>

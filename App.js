@@ -12,6 +12,7 @@ import DespesasVariaveis from './src/screens/DespesasVariaveis';
 import RelatoriosScreen from './src/screens/relatorioScreen';
 import PlanoNegocioScreen from './src/screens/PlanoNegocioScreen';
 import ProjecaoVendasScreen from './src/screens/ProjecoesVendasScreen';
+import SelecaoProdutoScreen from './src/screens/SelecaoProdutoScreen';
 
 const Stack = createStackNavigator();
 
@@ -19,7 +20,14 @@ export default function App() {
   return (
     <AppProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="HomeScreen">
+        <Stack.Navigator 
+          initialRouteName="HomeScreen"
+          screenOptions={{
+            headerBackTitle: 'VOLTAR', 
+            headerBackTitleStyle: { fontSize: 12 }, 
+            headerTintColor: '#4d235e', 
+          }}
+        >
           <Stack.Screen 
             name="HomeScreen" 
             component={HomeScreen} 
@@ -29,6 +37,11 @@ export default function App() {
             name="ConfiguracaoNegocio" 
             component={ConfiguracaoNegocio} 
             options={{ title: 'Configurações' }} 
+          />
+          <Stack.Screen 
+            name="SelecaoProduto" 
+            component={SelecaoProdutoScreen} 
+            options={{ title: 'Escolha o Produto' }} 
           />
           <Stack.Screen 
             name="ProjecoesVendas" 

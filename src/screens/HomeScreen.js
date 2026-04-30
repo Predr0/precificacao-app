@@ -53,7 +53,6 @@ export default function HomeScreen({ navigation }) {
             <Text className="text-white text-4xl font-black italic">Annik</Text>
           </View>
           
-          {/* BOTÃO CORRIGIDO: Tudo dentro da tag de abertura */}
           <TouchableOpacity 
             onPress={() => {
               popularDadosTeste();
@@ -80,7 +79,7 @@ export default function HomeScreen({ navigation }) {
             <MenuCard 
               title="Precificação" 
               icon="calculator-variant-outline" 
-              onPress={() => navigation.navigate('ConfiguracaoNegocio')} 
+              onPress={() => navigation.navigate('SelecaoProduto')} 
             />
             <MenuCard 
               title="Gestão de Gastos" 

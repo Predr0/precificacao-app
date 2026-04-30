@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView } from 'react-native';
 import { AppContext } from '../context/AppContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function CalculoProduto() {
   const { 
@@ -10,6 +11,9 @@ export default function CalculoProduto() {
     totalDF_Mensal, 
     totalDV_Mensal 
   } = useContext(AppContext);
+
+  const roxoProfundo = '#4d235e';
+  const lavanda = '#9e86bd';
 
   const calcular = () => {
     // 1. DADOS DE CAPACIDADE
@@ -59,81 +63,83 @@ export default function CalculoProduto() {
   const res = calcular();
 
   return (
-    <ScrollView className="flex-1 bg-white p-6">
-      <Text className="text-2xl font-black text-green-700 mb-6 text-center">Relatório Final</Text>
-      
-      {/* CARD DO PREÇO MARK-UP */}
-      <View className="bg-blue-600 p-8 rounded-[40px] mb-4 shadow-xl border-b-8 border-blue-800">
-        <Text className="text-white opacity-80 uppercase text-xs font-bold text-center mb-1">Preço Sugerido (PVM)</Text>
-        <Text className="text-white text-5xl font-black text-center">R$ {res.PVM.toFixed(2)}</Text>
-        <Text className="text-white mt-3 text-center italic text-xs">Índice Mark-up: {res.markupIndice.toFixed(2)}</Text>
-      </View>
-
-      {/* RF15: FAIXA DE PREÇO */}
-      <View className="bg-amber-50 p-4 rounded-2xl mb-6 border border-amber-200">
-        <Text className="text-amber-800 text-center font-medium text-xs">
-          💡 Você pode praticar entre <Text className="font-bold">R$ {res.PV.toFixed(2)}</Text> e <Text className="font-bold">R$ {res.PVM.toFixed(2)}</Text>
-        </Text>
-      </View>
-
-      {/* RF14: META PARA LUCRO */}
-      <View className="bg-red-50 p-6 rounded-3xl mb-6 border border-red-100">
-        <Text className="text-red-600 uppercase text-xs font-black mb-2">Meta para o Lucro (PE)</Text>
-        <Text className="text-gray-800 text-lg">
-          Venda <Text className="font-bold text-red-600">{Math.ceil(res.PE)}</Text> unidades/mês para não ter prejuízo.
-        </Text>
-      </View>
-
-      {/* AUDITORIA DE CÁLCULO (DEBUG TOTAL) */}
-      <View className="bg-slate-900 p-6 rounded-3xl mb-6 border-2 border-red-500 shadow-2xl">
-        <Text className="text-red-400 font-black uppercase mb-4 text-center text-[10px]">🛠 RAIO-X DE AUDITORIA (DEBUG)</Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
+        <Text style={{ color: roxoProfundo }} className="text-3xl font-black mb-6 text-center uppercase tracking-tighter">Relatório Final</Text>
         
-        <Text className="text-blue-300 font-bold text-[10px] mb-1">A. BASE MENSAL (INPUTS)</Text>
-        <View className="mb-3 pl-2 border-l border-slate-700">
-          <Text className="text-white text-[11px]">Custo Fixo Total (CF): R$ {totalCF_Mensal.toFixed(2)}</Text>
-          <Text className="text-white text-[11px]">Lucro Digitado: {res.lucroDesejado}%</Text>
-          <Text className="text-white text-[11px]">Tempo/Produto: {res.tempoProd} min</Text>
-          <Text className="text-white text-[11px]">Capacidade Total: {res.minutosTotaisMes} min</Text>
+        {/* CARD DO PREÇO MARK-UP */}
+        <View style={{ backgroundColor: roxoProfundo }} className="p-8 rounded-[40px] mb-4 shadow-xl border-b-8 border-[#3a1a46]">
+          <Text className="text-white opacity-80 uppercase text-xs font-bold text-center mb-1 tracking-widest">Preço Sugerido (PVM)</Text>
+          <Text className="text-white text-5xl font-black text-center">R$ {res.PVM.toFixed(2)}</Text>
+          <Text className="text-white mt-3 text-center italic text-xs">Índice Mark-up: {res.markupIndice.toFixed(2)}</Text>
         </View>
 
-        <Text className="text-blue-300 font-bold text-[10px] mb-1">B. RATEIO UNITÁRIO (R$)</Text>
-        <View className="mb-3 pl-2 border-l border-slate-700">
-          <Text className="text-green-400 text-[11px]">CFR (Fixo): R$ {res.CFR.toFixed(4)}</Text>
-          <Text className="text-green-400 text-[11px]">CVR (Material): R$ {res.CVR.toFixed(4)}</Text>
-          <Text className="text-green-400 text-[11px]">DFR (Desp. Fixa): R$ {res.DFR.toFixed(4)}</Text>
-          <Text className="text-green-400 text-[11px]">DVR (Desp. Var): R$ {res.DVR.toFixed(4)}</Text>
-          <Text className="text-white font-bold text-[11px]">TOTAL GERAL: R$ {res.totalGeral.toFixed(4)}</Text>
+        {/* RF15: FAIXA DE PREÇO */}
+        <View className="bg-amber-50 p-5 rounded-3xl mb-6 border border-amber-200">
+          <Text className="text-amber-800 text-center font-medium text-xs leading-5">
+            💡 Você pode praticar entre <Text className="font-bold">R$ {res.PV.toFixed(2)}</Text> e <Text className="font-bold">R$ {res.PVM.toFixed(2)}</Text>
+          </Text>
         </View>
 
-        <Text className="text-orange-400 font-bold text-[10px] mb-1">C. VALIDAÇÃO P.E. (RF14)</Text>
-        <View className="pl-2 border-l border-orange-900">
-          <Text className="text-white text-[11px]">Numerador (CF Mensal): R$ {totalCF_Mensal.toFixed(2)}</Text>
-          <Text className="text-white text-[11px]">PVM (Preço): R$ {res.PVM.toFixed(2)}</Text>
-          <Text className="text-white text-[11px]">CVR (Material): R$ {res.CVR.toFixed(2)}</Text>
-          <Text className="text-yellow-400 font-bold text-[11px]">Denominador (PVM - CVR): R$ {res.denominadorPE.toFixed(4)}</Text>
-          <Text className="text-green-400 font-black text-sm mt-1">PE Cru: {res.PE.toFixed(4)} un.</Text>
+        {/* RF14: META PARA LUCRO */}
+        <View className="bg-red-50 p-6 rounded-[35px] mb-6 border border-red-100">
+          <Text className="text-red-600 uppercase text-xs font-black mb-2 tracking-widest">Meta para o Lucro (PE)</Text>
+          <Text className="text-gray-800 text-lg">
+            Venda <Text className="font-bold text-red-600">{Math.ceil(res.PE)}</Text> unidades/mês para não ter prejuízo.
+          </Text>
         </View>
-      </View>
 
-      <View className="bg-gray-100 p-6 rounded-3xl mb-12">
-        <Text className="text-gray-500 uppercase text-xs font-bold mb-4">Composição do Preço (%)</Text>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-600">Custo Fixo (CF):</Text>
-          <Text className="font-bold">{res.pCF.toFixed(1)}%</Text>
+        {/* AUDITORIA DE CÁLCULO (ESTILIZADA) */}
+        <View className="bg-slate-900 p-6 rounded-[35px] mb-6 border-2 border-slate-800 shadow-2xl">
+          
+          <Text className="text-blue-300 font-bold text-[10px] mb-1 uppercase tracking-widest">A. BASE MENSAL (INPUTS)</Text>
+          <View className="mb-3 pl-2 border-l border-slate-700">
+            <Text className="text-white text-[11px]">Custo Fixo Total (CF): R$ {totalCF_Mensal.toFixed(2)}</Text>
+            <Text className="text-white text-[11px]">Lucro Digitado: {res.lucroDesejado.toFixed(2)}%</Text>
+            <Text className="text-white text-[11px]">Tempo/Produto: {res.tempoProd.toFixed(2)} min</Text>
+            <Text className="text-white text-[11px]">Capacidade Total: {res.minutosTotaisMes.toFixed(2)} min</Text>
+          </View>
+
+          <Text className="text-blue-300 font-bold text-[10px] mb-1 uppercase tracking-widest">B. RATEIO UNITÁRIO (R$)</Text>
+          <View className="mb-3 pl-2 border-l border-slate-700">
+            <Text className="text-green-400 text-[11px]">CFR (Fixo): R$ {res.CFR.toFixed(2)}</Text>
+            <Text className="text-green-400 text-[11px]">CVR (Material): R$ {res.CVR.toFixed(2)}</Text>
+            <Text className="text-green-400 text-[11px]">DFR (Desp. Fixa): R$ {res.DFR.toFixed(2)}</Text>
+            <Text className="text-green-400 text-[11px]">DVR (Desp. Var): R$ {res.DVR.toFixed(2)}</Text>
+            <Text className="text-white font-bold text-[11px]">TOTAL GERAL: R$ {res.totalGeral.toFixed(2)}</Text>
+          </View>
+
+          <Text className="text-orange-400 font-bold text-[10px] mb-1 uppercase tracking-widest">C. VALIDAÇÃO P.E. (RF14)</Text>
+          <View className="pl-2 border-l border-orange-900">
+            <Text className="text-white text-[11px]">Numerador (CF Mensal): R$ {totalCF_Mensal.toFixed(2)}</Text>
+            <Text className="text-white text-[11px]">PVM (Preço): R$ {res.PVM.toFixed(2)}</Text>
+            <Text className="text-white text-[11px]">CVR (Material): R$ {res.CVR.toFixed(2)}</Text>
+            <Text className="text-yellow-400 font-bold text-[11px]">Denominador (PVM - CVR): R$ {res.denominadorPE.toFixed(2)}</Text>
+            <Text className="text-green-400 font-black text-sm mt-1">PE: {res.PE.toFixed(2)} un.</Text>
+          </View>
         </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-600">Custo Variável (CV):</Text>
-          <Text className="font-bold">{res.pCV.toFixed(1)}%</Text>
+
+        {/* COMPOSIÇÃO DO PREÇO (%) */}
+        <View className="bg-gray-100 p-6 rounded-[35px] mb-12">
+          <Text className="text-gray-500 uppercase text-xs font-bold mb-4 tracking-widest">Composição do Preço (%)</Text>
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-gray-600 font-medium">Custo Fixo (CF):</Text>
+            <Text style={{ color: roxoProfundo }} className="font-black">{res.pCF.toFixed(2)}%</Text>
+          </View>
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-gray-600 font-medium">Custo Variável (CV):</Text>
+            <Text style={{ color: roxoProfundo }} className="font-black">{res.pCV.toFixed(2)}%</Text>
+          </View>
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-gray-600 font-medium">Despesa Fixa (DF):</Text>
+            <Text style={{ color: roxoProfundo }} className="font-black">{res.pDF.toFixed(2)}%</Text>
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="text-gray-600 font-medium">Despesa Variável (DV):</Text>
+            <Text style={{ color: roxoProfundo }} className="font-black">{res.pDV.toFixed(2)}%</Text>
+          </View>
         </View>
-        <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-600">Despesa Fixa (DF):</Text>
-          <Text className="font-bold">{res.pDF.toFixed(1)}%</Text>
-        </View>
-        <View className="flex-row justify-between">
-          <Text className="text-gray-600">Despesa Variável (DV):</Text>
-          <Text className="font-bold">{res.pDV.toFixed(1)}%</Text>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
