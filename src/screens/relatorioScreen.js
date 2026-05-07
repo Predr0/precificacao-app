@@ -55,9 +55,6 @@ export default function RelatoriosScreen() {
     const PV_sem = totalGeral + (totalGeral * (lucroDesejado / 100));
     const PVM = totalGeral * markupIndice;
 
-    const diferencaAbsoluta = PVM - PV_sem;
-    const ganhoPercentual = PV_sem > 0 ? (diferencaAbsoluta / PV_sem) * 100 : 0;
-
     const margemBrutaSem = PV_sem - CVR;
     const margemBrutaCom = PVM - CVR;
     const margemBrutaPercSem = PV_sem > 0 ? (margemBrutaSem / PV_sem) * 100 : 0;
@@ -74,29 +71,43 @@ export default function RelatoriosScreen() {
       CFR, CVR, DFR, DVR, totalGeral, PV_sem, PVM, PE_Sem, PE_Com,
       pCF, pCV, pDF, pDV, markupIndice, 
       totalCF_Mensal, totalDF_Mensal, totalDV_Mensal, lucroDesejado,
-      diferencaAbsoluta, ganhoPercentual, margemBrutaSem, margemBrutaCom,
-      margemBrutaPercSem, margemBrutaPercCom, somaCF_DF_DV, lucroFinalSem, lucroFinalCom,
+      diferencaAbsoluta: PVM - PV_sem,
+      ganhoPercentual: PV_sem > 0 ? ((PVM - PV_sem) / PV_sem) * 100 : 0,
+      margemBrutaSem, margemBrutaCom,
+      margemBrutaPercSem: PV_sem > 0 ? (margemBrutaSem / PV_sem) * 100 : 0,
+      margemBrutaPercCom: PVM > 0 ? (margemBrutaCom / PVM) * 100 : 0,
+      somaCF_DF_DV, lucroFinalSem, lucroFinalCom,
       fatorRateio
     };
   };
 
   const r = calcular(produtoSelecionado);
 
-  const TabelaDinamica = ({ titulo, dados, valorTotal, labelTotal, cor, mostrarRateio = false, fator = 0 }) => (
+  const TabelaDinamica = ({ titulo, dados, valorTotal, labelTotal, cor, mostrarRateio = false, fator = 0, isCV = false }) => (
     <View className="mb-6 border border-gray-100 rounded-[30px] overflow-hidden bg-white shadow-sm">
       <View style={{ backgroundColor: cor }} className="p-4">
-        <Text className="text-white font-black text-[10px] uppercase tracking-widest">{titulo}</Text>
+        <Text className="text-white font-black text-[10px] uppercase tracking-widest text-center">{titulo}</Text>
       </View>
       {dados.map((item, index) => {
-        const mensal = parseFloat(item.valor || item.salario || item.custoFração || 0);
-        const rateado = mensal * fator;
+        let principal = 0;
+        let rateado = 0;
+
+        if (isCV) {
+          // Lógica para Materiais: Preço Pacote (Preço Fração)
+          principal = parseFloat(item.precoEmbalagem || 0);
+          rateado = parseFloat(item.custoFração || 0);
+        } else {
+          // Lógica para Fixos: Preço Mensal (Preço Rateado)
+          principal = parseFloat(item.valor || item.salario || 0);
+          rateado = principal * fator;
+        }
         
         return (
           <View key={index} className="flex-row justify-between p-4 border-b border-gray-50">
             <Text className="text-gray-500 text-[11px] flex-1">{item.nome || 'Item'}</Text>
             <View className="items-end">
               <Text className="font-bold text-gray-800 text-[11px]">
-                R$ {mensal.toFixed(2)}
+                R$ {principal.toFixed(2)}
                 {mostrarRateio && (
                   <Text style={{ color: lavanda }} className="font-medium"> ({rateado.toFixed(2)})</Text>
                 )}
@@ -107,7 +118,7 @@ export default function RelatoriosScreen() {
       })}
       <View className="bg-gray-50 p-4 flex-row justify-between">
         <Text className="font-black text-gray-400 text-[9px] uppercase">{labelTotal}</Text>
-        <Text style={{ color: roxo }} className="font-black text-xs">R$ {valorTotal.toFixed(2)}</Text>
+        <Text style={{ color: roxo }} className="font-black text-xs text-center">R$ {valorTotal.toFixed(2)}</Text>
       </View>
     </View>
   );
@@ -166,33 +177,34 @@ export default function RelatoriosScreen() {
             {abaAtiva === 'geral' && (
               <View>
                 <TabelaDinamica 
-                  titulo="Custos Fixos Mensais" 
+                  titulo="Custos Fixos (Valor Mensal vs Rateio)" 
                   dados={[
                     { nome: "Pró-labore (Dono)", salario: produtoSelecionado.config.salario },
                     ...produtoSelecionado.listaColaboradores.map(c => ({ nome: c.nome, salario: c.salario })),
                     ...produtoSelecionado.listaCustosFixos.map(i => ({ nome: i.nome, valor: i.valor }))
                   ]} 
                   valorTotal={r.CFR} 
-                  labelTotal="Total CF Rateado" 
+                  labelTotal="Total CF Unitário" 
                   cor={roxo} 
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
                 
                 <TabelaDinamica 
-                  titulo="Materiais (Insumos)" 
+                  titulo="Materiais (Pacote vs Fração Usada)" 
                   dados={produtoSelecionado.insumos} 
                   valorTotal={r.CVR} 
-                  labelTotal="Total CV Unitário" 
+                  labelTotal="Total Material por Peça" 
                   cor="#2D6A4F" 
-                  mostrarRateio={false} // Materiais já são unitários
+                  mostrarRateio={true}
+                  isCV={true}
                 />
 
                 <TabelaDinamica 
                   titulo="Despesas Fixas" 
                   dados={produtoSelecionado.listaDespesasFixas} 
                   valorTotal={r.DFR} 
-                  labelTotal="Total DF Rateado" 
+                  labelTotal="Total DF Unitário" 
                   cor="#1B4332" 
                   mostrarRateio={true}
                   fator={r.fatorRateio}
@@ -202,20 +214,20 @@ export default function RelatoriosScreen() {
                   titulo="Despesas Variáveis" 
                   dados={produtoSelecionado.listaDespesasVariaveis} 
                   valorTotal={r.DVR} 
-                  labelTotal="Total DV Rateado" 
+                  labelTotal="Total DV Unitário" 
                   cor="#D4A373" 
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
 
                 <View className="bg-white border border-gray-200 rounded-[35px] overflow-hidden mb-8 shadow-sm">
-                  <View style={{ backgroundColor: '#F2F2F2' }} className="p-4"><Text className="font-black text-[10px] uppercase">Motor de Precificação</Text></View>
+                  <View style={{ backgroundColor: '#F2F2F2' }} className="p-4"><Text className="font-black text-[10px] uppercase text-center">Motor de Precificação</Text></View>
                   <View className="p-5">
-                    <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Custo Unitário Total</Text><Text className="font-bold text-xs">R$ {r.totalGeral.toFixed(2)}</Text></View>
-                    <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Margem de Lucro</Text><Text className="font-bold text-xs">{r.lucroDesejado}%</Text></View>
-                    <View className="flex-row justify-between mb-4 border-t border-gray-100 pt-2"><Text className="font-bold text-xs">Mark-up Calculado</Text><Text className="font-black text-purple-700">{r.markupIndice.toFixed(2)}</Text></View>
+                    <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Custo Unitário Total</Text><Text className="font-bold text-xs text-center">R$ {r.totalGeral.toFixed(2)}</Text></View>
+                    <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Margem de Lucro</Text><Text className="font-bold text-xs text-center">{r.lucroDesejado}%</Text></View>
+                    <View className="flex-row justify-between mb-4 border-t border-gray-100 pt-2"><Text className="font-bold text-xs">Mark-up Calculado</Text><Text className="font-black text-purple-700 text-center">{r.markupIndice.toFixed(2)}x</Text></View>
                     <View style={{ backgroundColor: roxo }} className="p-5 rounded-3xl">
-                      <Text className="text-white/70 text-[10px] font-bold uppercase text-center">Preço Final com Mark-up</Text>
+                      <Text className="text-white/70 text-[10px] font-bold uppercase text-center">Preço Sugerido com Mark-up</Text>
                       <Text className="text-white text-3xl font-black text-center mt-1">R$ {r.PVM.toFixed(2)}</Text>
                     </View>
                   </View>
@@ -225,7 +237,6 @@ export default function RelatoriosScreen() {
 
             {abaAtiva === 'formacao' && (
               <View>
-                {/* ... (aba inalterada conforme solicitado) */}
                 <View className="mb-6 border border-gray-100 rounded-[40px] overflow-hidden bg-white shadow-xl">
                   <View style={{ backgroundColor: '#f3f4f6' }} className="p-5 flex-row justify-between">
                     <Text className="font-black text-[9px] uppercase text-gray-400">Descrição</Text>
@@ -241,28 +252,27 @@ export default function RelatoriosScreen() {
                   <LinhaFormacao label="TOTAL (CV+CF+DF+DV)" valor={r.totalGeral} porcentagem="100%" negrito corFundo="#f9fafb" />
                   <LinhaFormacao label="Margem de lucro desejada" valor={r.totalGeral * (r.lucroDesejado/100)} porcentagem={`${r.lucroDesejado}%`} />
                   <LinhaFormacao label="Preço de venda (sem mark-up)" valor={r.PV_sem} porcentagem="-" negrito />
-                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-gray-500 text-xs font-medium">Mark-up</Text><Text className="font-black text-purple-700 text-xs">{r.markupIndice.toFixed(2)}</Text></View>
-                  <View style={{ backgroundColor: roxo }} className="flex-row justify-between p-5"><Text className="text-white font-black text-xs uppercase">Preço de venda (com mark-up)</Text><Text className="text-white font-black text-xs">R$ {r.PVM.toFixed(2)}</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-gray-500 text-xs font-medium">Mark-up</Text><Text className="font-black text-purple-700 text-xs text-center">{r.markupIndice.toFixed(2)}</Text></View>
+                  <View style={{ backgroundColor: roxo }} className="flex-row justify-between p-5"><Text className="text-white font-black text-xs uppercase">Preço de venda (com mark-up)</Text><Text className="text-white font-black text-xs text-center">R$ {r.PVM.toFixed(2)}</Text></View>
                 </View>
               </View>
             )}
 
             {abaAtiva === 'margem' && (
               <View>
-                {/* ... (aba inalterada conforme solicitado) */}
                 <View className="mb-6 border border-gray-100 rounded-[40px] overflow-hidden bg-white shadow-xl">
                   <View style={{ backgroundColor: roxo }} className="p-5 flex-row justify-between">
                     <Text className="text-white font-black text-[9px] uppercase flex-1">Indicador</Text>
                     <Text className="text-white font-black text-[9px] uppercase w-20 text-right">Simples</Text>
                     <Text className="text-white font-black text-[9px] uppercase w-20 text-right">Mark-up</Text>
                   </View>
-                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Preço de venda (PV)</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.PV_sem.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right">R$ {r.PVM.toFixed(2)}</Text></View>
-                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Custo variável (CV)</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.CVR.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right">R$ {r.CVR.toFixed(2)}</Text></View>
-                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Margem bruta (PV-CV)</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.margemBrutaSem.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right">R$ {r.margemBrutaCom.toFixed(2)}</Text></View>
-                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Margem bruta (%)</Text><Text className="text-xs font-bold w-20 text-right">{r.margemBrutaPercSem.toFixed(2)}%</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right">{r.margemBrutaPercCom.toFixed(2)}%</Text></View>
-                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Custos + Despesas</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.somaCF_DF_DV.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right">R$ {r.somaCF_DF_DV.toFixed(2)}</Text></View>
-                  <View className="flex-row justify-between p-4 border-b border-gray-50 bg-purple-50"><Text className="text-[10px] font-black text-purple-900 uppercase flex-1">Lucro/Prejuízo</Text><Text className="text-xs font-black w-20 text-right">R$ {r.lucroFinalSem.toFixed(2)}</Text><Text className="text-xs font-black text-purple-900 w-20 text-right">R$ {r.lucroFinalCom.toFixed(2)}</Text></View>
-                  <View className="flex-row justify-between p-4 bg-gray-50"><Text className="text-[10px] font-bold text-gray-400 uppercase flex-1">Ponto de Equilíbrio</Text><Text className="text-xs font-bold text-gray-400 w-20 text-right">{Math.ceil(r.PE_Sem)} un</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right">{Math.ceil(r.PE_Com)} un</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Preço de venda (PV)</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.PV_sem.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right text-center">R$ {r.PVM.toFixed(2)}</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Custo variável (CV)</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.CVR.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right text-center">R$ {r.CVR.toFixed(2)}</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Margem bruta (PV-CV)</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.margemBrutaSem.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right text-center">R$ {r.margemBrutaCom.toFixed(2)}</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Margem bruta (%)</Text><Text className="text-xs font-bold w-20 text-right">{r.margemBrutaPercSem.toFixed(2)}%</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right text-center">{r.margemBrutaPercCom.toFixed(2)}%</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50"><Text className="text-[10px] font-bold text-gray-500 uppercase flex-1">Custos + Despesas</Text><Text className="text-xs font-bold w-20 text-right">R$ {r.somaCF_DF_DV.toFixed(2)}</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right text-center">R$ {r.somaCF_DF_DV.toFixed(2)}</Text></View>
+                  <View className="flex-row justify-between p-4 border-b border-gray-50 bg-purple-50"><Text className="text-[10px] font-black text-purple-900 uppercase flex-1">Lucro/Prejuízo</Text><Text className="text-xs font-black w-20 text-right text-center">R$ {r.lucroFinalSem.toFixed(2)}</Text><Text className="text-xs font-black text-purple-900 w-20 text-right text-center">R$ {r.lucroFinalCom.toFixed(2)}</Text></View>
+                  <View className="flex-row justify-between p-4 bg-gray-50"><Text className="text-[10px] font-bold text-gray-400 uppercase flex-1">Ponto de Equilíbrio</Text><Text className="text-xs font-bold text-gray-400 w-20 text-right text-center">{Math.ceil(r.PE_Sem)} un</Text><Text style={{ color: roxo }} className="text-xs font-black w-20 text-right text-center">{Math.ceil(r.PE_Com)} un</Text></View>
                 </View>
               </View>
             )}

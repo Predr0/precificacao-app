@@ -11,7 +11,6 @@ export default function Insumos({ navigation }) {
   const [qtdE, setQtdE] = useState('');
   const [qtdU, setQtdU] = useState('');
   
-  // 1. Criamos um estado para a lista de botões
   const [listaUnidades, setListaUnidades] = useState(['unid', 'kg', 'g', 'ml', 'L']);
   const [unidade, setUnidade] = useState('unid');
   
@@ -35,6 +34,7 @@ export default function Insumos({ navigation }) {
       id: Date.now().toString(), 
       nome, 
       unidade, 
+      precoEmbalagem: p, // ADICIONADO: Guarda o valor pago pelo pacote
       custoFração,
       detalhes: `${qU}${unidade} de ${qE}${unidade}`
     }]);
@@ -60,7 +60,7 @@ export default function Insumos({ navigation }) {
         
         <View className="mb-8">
           <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Insumos</Text>
-          <Text className="text-gray-400 font-bold text-xs uppercase">Ficha Técnica de Materiais</Text>
+          <Text className="text-gray-400 font-bold text-xs uppercase text-center">Ficha Técnica de Materiais</Text>
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-8 border border-purple-100">
@@ -118,11 +118,11 @@ export default function Insumos({ navigation }) {
                 style={{ backgroundColor: unidade === m ? roxo : 'white' }} 
                 className="px-4 py-2 rounded-full border border-purple-200"
               >
-                <Text style={{ color: unidade === m ? 'white' : roxo }} className="font-black text-[10px] uppercase">{m}</Text>
+                <Text style={{ color: unidade === m ? 'white' : roxo }} className="font-black text-[10px] uppercase text-center">{m}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity onPress={() => setModalVisible(true)} className="px-4 py-2 rounded-full bg-white border border-dashed border-purple-400">
-              <Text style={{ color: roxo }} className="font-black text-[10px] uppercase">+ Outra</Text>
+              <Text style={{ color: roxo }} className="font-black text-[10px] uppercase text-center">+ Outra</Text>
             </TouchableOpacity>
           </View>
 
@@ -132,7 +132,7 @@ export default function Insumos({ navigation }) {
             onPress={adicionarInsumo}
           >
             <MaterialCommunityIcons name="plus-circle" size={20} color="white" />
-            <Text className="text-white font-black text-xs uppercase ml-2">Cadastrar Insumo</Text>
+            <Text className="text-white font-black text-xs uppercase ml-2 text-center">Cadastrar Insumo</Text>
           </TouchableOpacity>
         </View>
 
@@ -143,7 +143,7 @@ export default function Insumos({ navigation }) {
               <View className="flex-1 pr-4">
                 <Text style={{ color: roxo }} className="font-black text-xs uppercase">{item.nome}</Text>
                 <Text className="text-gray-400 text-[9px] font-bold uppercase tracking-tighter">{item.detalhes}</Text>
-                <Text style={{ color: '#059669' }} className="font-bold text-xs mt-1">Custo: R$ {item.custoFração.toFixed(2)}</Text>
+                <Text style={{ color: '#059669' }} className="font-bold text-xs mt-1">Custo Fração: R$ {item.custoFração.toFixed(2)}</Text>
               </View>
               <TouchableOpacity onPress={() => removerItem(item.id, insumos, setInsumos)} className="bg-red-50 p-2 rounded-full">
                 <MaterialCommunityIcons name="trash-can-outline" size={20} color="#ff4444" />
@@ -157,7 +157,7 @@ export default function Insumos({ navigation }) {
           className="p-6 rounded-[35px] mb-20 shadow-xl flex-row justify-center items-center" 
           onPress={() => navigation.navigate('CalculoProduto')}
         >
-          <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Finalizar e Ver Preço</Text>
+          <Text className="text-white text-center font-black text-xs uppercase tracking-widest text-center">Finalizar e Ver Preço</Text>
         </TouchableOpacity>
 
         <Modal visible={modalVisible} transparent animationType="fade">
@@ -176,7 +176,7 @@ export default function Insumos({ navigation }) {
                 className="p-4 rounded-2xl" 
                 onPress={confirmarNovaUnidade}
               >
-                <Text className="text-white text-center font-black uppercase text-xs">Confirmar</Text>
+                <Text className="text-white text-center font-black uppercase text-xs text-center">Confirmar</Text>
               </TouchableOpacity>
             </View>
           </View>
