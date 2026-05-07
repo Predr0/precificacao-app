@@ -13,7 +13,6 @@ export default function RelatoriosScreen() {
   const roxo = '#4d235e';
   const lavanda = '#9e86bd';
 
-  // CÁLCULOS TÉCNICOS (IDÊNTICOS AO SEU, MAS USANDO O PRODUTO SELECIONADO)
   const calcular = (p) => {
     if (!p) return null;
 
@@ -110,22 +109,21 @@ export default function RelatoriosScreen() {
   return (
     <SafeAreaView style={{ backgroundColor: '#F9F9FF', flex: 1 }}>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: height * 0.05, paddingBottom: 60 }}>
-        
         <View className="mb-8 flex-row justify-between items-end">
           <View>
             <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Relatórios</Text>
             {produtoSelecionado && (
-                <Text style={{ color: roxo }} className="font-bold text-[10px] uppercase mt-1">
-                    Analisando: <Text className="font-black">{produtoSelecionado.nome}</Text>
-                </Text>
+              <Text style={{ color: roxo }} className="font-bold text-[10px] uppercase mt-1">
+                Analisando: <Text className="font-black">{produtoSelecionado.nome}</Text>
+              </Text>
             )}
           </View>
           {produtoSelecionado ? (
-              <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
-                  <MaterialCommunityIcons name="swap-horizontal" size={32} color={roxo} />
-              </TouchableOpacity>
+            <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
+              <MaterialCommunityIcons name="swap-horizontal" size={32} color={roxo} />
+            </TouchableOpacity>
           ) : (
-              <MaterialCommunityIcons name="finance" size={32} color={roxo} />
+            <MaterialCommunityIcons name="finance" size={32} color={roxo} />
           )}
         </View>
 
@@ -133,31 +131,22 @@ export default function RelatoriosScreen() {
           <View>
             <Text className="text-gray-400 font-bold text-[10px] uppercase mb-4 ml-2">Selecione o produto para processar os dados:</Text>
             {produtos.map((item) => (
-                <TouchableOpacity 
-                    key={item.id}
-                    onPress={() => setProdutoSelecionado(item)} 
-                    style={{ backgroundColor: roxo }} 
-                    className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between"
-                >
-                    <Text className="text-white font-black uppercase text-center">{item.nome}</Text>
-                    <MaterialCommunityIcons name="chevron-right" size={24} color="white" />
-                </TouchableOpacity>
+              <TouchableOpacity key={item.id} onPress={() => setProdutoSelecionado(item)} style={{ backgroundColor: roxo }} className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between">
+                <Text className="text-white font-black uppercase text-center">{item.nome}</Text>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="white" />
+              </TouchableOpacity>
             ))}
             {produtos.length === 0 && (
-                <Text className="text-gray-400 text-center italic mt-10">Nenhum produto cadastrado.</Text>
+              <Text className="text-gray-400 text-center italic mt-10">Nenhum produto cadastrado.</Text>
             )}
           </View>
         ) : (
           <View>
             <View className="flex-row bg-gray-200 p-1 rounded-2xl mb-8">
               {['geral', 'formacao', 'margem'].map((item) => (
-                <TouchableOpacity 
-                  key={item}
-                  onPress={() => setAbaAtiva(item)}
-                  className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}
-                >
+                <TouchableOpacity key={item} onPress={() => setAbaAtiva(item)} className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}>
                   <Text style={{ color: abaAtiva === item ? roxo : '#9ca3af' }} className="text-center font-black text-[8px] uppercase">
-                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Formação Preço de Venda' : 'Margem/Rentab'}
+                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Preço de Venda' : 'Margem/Rentab'}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -169,7 +158,6 @@ export default function RelatoriosScreen() {
                 <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total CV Unidade" cor="#2D6A4F" />
                 <TabelaDinamica titulo="Despesas Fixas" dados={produtoSelecionado.listaDespesasFixas} valorTotal={r.totalDF_Mensal} labelTotal="Total DF" cor="#1B4332" />
                 <TabelaDinamica titulo="Despesas Variáveis" dados={produtoSelecionado.listaDespesasVariaveis} valorTotal={r.totalDV_Mensal} labelTotal="Total DV" cor="#D4A373" />
-
                 <View className="bg-white border border-gray-200 rounded-[35px] overflow-hidden mb-8 shadow-sm">
                   <View style={{ backgroundColor: '#F2F2F2' }} className="p-4"><Text className="font-black text-[10px] uppercase">Motor de Precificação</Text></View>
                   <View className="p-5">
@@ -182,7 +170,6 @@ export default function RelatoriosScreen() {
                     </View>
                   </View>
                 </View>
-
                 <View className="bg-amber-50 p-8 rounded-[40px] mb-10 border border-amber-200 items-center">
                   <Text className="text-amber-900 font-black text-xs mb-2 uppercase">Ponto de Equilíbrio</Text>
                   <Text className="text-amber-900 text-5xl font-black">{Math.ceil(r.PE_Com)}</Text>
@@ -243,7 +230,7 @@ export default function RelatoriosScreen() {
                   </Text>
                 </View>
               </View>
-            )}  
+            )}
           </View>
         )}
       </ScrollView>

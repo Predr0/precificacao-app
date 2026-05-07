@@ -52,8 +52,24 @@ export default function PlanoNegocioScreen({ navigation }) {
     propostaValor: config.propostaValor || '',
     objetivoCurtoPrazo: config.objetivoCurtoPrazo || '', 
     metaCurtoPrazo: config.metaCurtoPrazo || '',     
-    contato: config.contato || '',
+    redesSociais: config.redesSociais || [], // Agora é um array
   });
+
+  const [novaRede, setNovaRede] = useState('');
+
+  const adicionarRede = () => {
+    if (novaRede.trim() === '') return;
+    setDados({
+      ...dados,
+      redesSociais: [...dados.redesSociais, novaRede.trim()]
+    });
+    setNovaRede('');
+  };
+
+  const removerRede = (index) => {
+    const atualizadas = dados.redesSociais.filter((_, i) => i !== index);
+    setDados({ ...dados, redesSociais: atualizadas });
+  };
 
   const salvar = () => {
     if (!dados.nomeNegocio) {
@@ -94,13 +110,45 @@ export default function PlanoNegocioScreen({ navigation }) {
             onChangeText={(t) => setDados({...dados, cnpj: formatarCNPJ(t)})}
           />
 
-          <InputLabel 
-            label="Contato / Redes Sociais" 
-            icon="at"
-            placeholder="@seu_negocio"
-            value={dados.contato}
-            onChangeText={(t) => setDados({...dados, contato: t})}
-          />
+          {/* Seção de Redes Sociais Dinâmica */}
+          <View className="mb-2 ml-1 flex-row items-center">
+            <MaterialCommunityIcons name="at" size={16} color={roxo} />
+            <Text style={{ color: roxo }} className="font-black text-[10px] uppercase ml-2 tracking-widest">Redes Sociais / Contatos</Text>
+          </View>
+          
+          <View className="flex-row items-center mb-4">
+            <TextInput
+              placeholder="Ex: @seu_negocio"
+              placeholderTextColor="#CCC"
+              className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm flex-1 bg-white"
+              style={{ borderColor: '#F0F0F0', minHeight: 55 }}
+              value={novaRede}
+              onChangeText={setNovaRede}
+            />
+            <TouchableOpacity 
+              onPress={adicionarRede}
+              style={{ backgroundColor: roxo }}
+              className="ml-2 p-4 rounded-full shadow-md"
+            >
+              <MaterialCommunityIcons name="plus" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Listagem das redes adicionadas */}
+          <View className="flex-row flex-wrap mb-4">
+            {dados.redesSociais.map((rede, index) => (
+              <View 
+                key={index} 
+                style={{ backgroundColor: roxo }}
+                className="flex-row items-center px-4 py-2 rounded-full mr-2 mb-2 shadow-sm"
+              >
+                <Text className="text-white font-bold text-xs mr-2">{rede}</Text>
+                <TouchableOpacity onPress={() => removerRede(index)}>
+                  <MaterialCommunityIcons name="close-circle" size={16} color="white" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">

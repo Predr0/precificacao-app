@@ -109,7 +109,7 @@ export default function CalculoProduto() {
             <Text className="text-white font-bold text-[11px]">TOTAL GERAL: R$ {res.totalGeral.toFixed(2)}</Text>
           </View>
 
-          <Text className="text-orange-400 font-bold text-[10px] mb-1 uppercase tracking-widest">C. VALIDAÇÃO P.E. (RF14)</Text>
+          <Text className="text-orange-400 font-bold text-[10px] mb-1 uppercase tracking-widest">C. VALIDAÇÃO P.E.</Text>
           <View className="pl-2 border-l border-orange-900">
             <Text className="text-white text-[11px]">Numerador (CF Mensal): R$ {totalCF_Mensal.toFixed(2)}</Text>
             <Text className="text-white text-[11px]">PVM (Preço): R$ {res.PVM.toFixed(2)}</Text>
