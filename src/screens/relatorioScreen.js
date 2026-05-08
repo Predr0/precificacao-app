@@ -55,28 +55,21 @@ export default function RelatoriosScreen() {
     const PV_sem = totalGeral + (totalGeral * (lucroDesejado / 100));
     const PVM = totalGeral * markupIndice;
 
-    const margemBrutaSem = PV_sem - CVR;
-    const margemBrutaCom = PVM - CVR;
-    const margemBrutaPercSem = PV_sem > 0 ? (margemBrutaSem / PV_sem) * 100 : 0;
-    const margemBrutaPercCom = PVM > 0 ? (margemBrutaCom / PVM) * 100 : 0;
-
-    const somaCF_DF_DV = CFR + DFR + DVR;
-    const lucroFinalSem = PV_sem - totalGeral;
-    const lucroFinalCom = PVM - totalGeral;
-
-    const PE_Sem = margemBrutaSem > 0 ? totalCF_Mensal / margemBrutaSem : 0;
-    const PE_Com = margemBrutaCom > 0 ? totalCF_Mensal / margemBrutaCom : 0;
-
     return { 
-      CFR, CVR, DFR, DVR, totalGeral, PV_sem, PVM, PE_Sem, PE_Com,
+      CFR, CVR, DFR, DVR, totalGeral, PV_sem, PVM, 
       pCF, pCV, pDF, pDV, markupIndice, 
       totalCF_Mensal, totalDF_Mensal, totalDV_Mensal, lucroDesejado,
       diferencaAbsoluta: PVM - PV_sem,
       ganhoPercentual: PV_sem > 0 ? ((PVM - PV_sem) / PV_sem) * 100 : 0,
-      margemBrutaSem, margemBrutaCom,
-      margemBrutaPercSem: PV_sem > 0 ? (margemBrutaSem / PV_sem) * 100 : 0,
-      margemBrutaPercCom: PVM > 0 ? (margemBrutaCom / PVM) * 100 : 0,
-      somaCF_DF_DV, lucroFinalSem, lucroFinalCom,
+      margemBrutaSem: PV_sem - CVR,
+      margemBrutaCom: PVM - CVR,
+      margemBrutaPercSem: PV_sem > 0 ? ((PV_sem - CVR) / PV_sem) * 100 : 0,
+      margemBrutaPercCom: PVM > 0 ? ((PVM - CVR) / PVM) * 100 : 0,
+      somaCF_DF_DV: CFR + DFR + DVR,
+      lucroFinalSem: PV_sem - totalGeral,
+      lucroFinalCom: PVM - totalGeral,
+      PE_Sem: (PV_sem - CVR) > 0 ? totalCF_Mensal / (PV_sem - CVR) : 0,
+      PE_Com: (PVM - CVR) > 0 ? totalCF_Mensal / (PVM - CVR) : 0,
       fatorRateio
     };
   };
@@ -91,17 +84,13 @@ export default function RelatoriosScreen() {
       {dados.map((item, index) => {
         let principal = 0;
         let rateado = 0;
-
         if (isCV) {
-          // Lógica para Materiais: Preço Pacote (Preço Fração)
           principal = parseFloat(item.precoEmbalagem || 0);
           rateado = parseFloat(item.custoFração || 0);
         } else {
-          // Lógica para Fixos: Preço Mensal (Preço Rateado)
           principal = parseFloat(item.valor || item.salario || 0);
           rateado = principal * fator;
         }
-        
         return (
           <View key={index} className="flex-row justify-between p-4 border-b border-gray-50">
             <Text className="text-gray-500 text-[11px] flex-1">{item.nome || 'Item'}</Text>
@@ -168,7 +157,7 @@ export default function RelatoriosScreen() {
               {['geral', 'formacao', 'margem'].map((item) => (
                 <TouchableOpacity key={item} onPress={() => setAbaAtiva(item)} className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}>
                   <Text style={{ color: abaAtiva === item ? roxo : '#9ca3af' }} className="text-center font-black text-[8px] uppercase">
-                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Preço de Venda' : 'Margem/Rentab'}
+                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Formação' : 'Margem'}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -177,11 +166,11 @@ export default function RelatoriosScreen() {
             {abaAtiva === 'geral' && (
               <View>
                 <TabelaDinamica 
-                  titulo="Custos Fixos (Valor Mensal vs Rateio)" 
+                  titulo="Custos Fixos (Mês vs Rateio)" 
                   dados={[
                     { nome: "Pró-labore (Dono)", salario: produtoSelecionado.config.salario },
-                    ...produtoSelecionado.listaColaboradores.map(c => ({ nome: c.nome, salario: c.salario })),
-                    ...produtoSelecionado.listaCustosFixos.map(i => ({ nome: i.nome, valor: i.valor }))
+                    ...produtoSelecionado.listaColaboradores,
+                    ...produtoSelecionado.listaCustosFixos
                   ]} 
                   valorTotal={r.CFR} 
                   labelTotal="Total CF Unitário" 
@@ -189,39 +178,37 @@ export default function RelatoriosScreen() {
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
-                
                 <TabelaDinamica 
-                  titulo="Materiais (Pacote vs Fração Usada)" 
+                  titulo="Materiais (Pacote vs Fração)" 
                   dados={produtoSelecionado.insumos} 
                   valorTotal={r.CVR} 
-                  labelTotal="Total Material por Peça" 
-                  cor="#2D6A4F" 
+                  labelTotal="Total Material Unidade" 
+                  cor={roxo} 
                   mostrarRateio={true}
                   isCV={true}
                 />
-
                 <TabelaDinamica 
                   titulo="Despesas Fixas" 
                   dados={produtoSelecionado.listaDespesasFixas} 
                   valorTotal={r.DFR} 
                   labelTotal="Total DF Unitário" 
-                  cor="#1B4332" 
+                  cor={roxo} 
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
-
                 <TabelaDinamica 
                   titulo="Despesas Variáveis" 
                   dados={produtoSelecionado.listaDespesasVariaveis} 
                   valorTotal={r.DVR} 
                   labelTotal="Total DV Unitário" 
-                  cor="#D4A373" 
+                  cor={roxo} 
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
-
                 <View className="bg-white border border-gray-200 rounded-[35px] overflow-hidden mb-8 shadow-sm">
-                  <View style={{ backgroundColor: '#F2F2F2' }} className="p-4"><Text className="font-black text-[10px] uppercase text-center">Motor de Precificação</Text></View>
+                  <View style={{ backgroundColor: lavanda }} className="p-4">
+                    <Text className="font-black text-[10px] uppercase text-center text-white">Motor de Precificação</Text>
+                  </View>
                   <View className="p-5">
                     <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Custo Unitário Total</Text><Text className="font-bold text-xs text-center">R$ {r.totalGeral.toFixed(2)}</Text></View>
                     <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Margem de Lucro</Text><Text className="font-bold text-xs text-center">{r.lucroDesejado}%</Text></View>
