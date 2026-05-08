@@ -225,7 +225,7 @@ export default function RelatoriosScreen() {
                   <View className="p-5">
                     <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Custo Unitário Total</Text><Text className="font-bold text-xs text-center">R$ {r.totalGeral.toFixed(2)}</Text></View>
                     <View className="flex-row justify-between mb-2"><Text className="text-gray-500 text-xs">Margem de Lucro</Text><Text className="font-bold text-xs text-center">{r.lucroDesejado}%</Text></View>
-                    <View className="flex-row justify-between mb-4 border-t border-gray-100 pt-2"><Text className="font-bold text-xs">Mark-up Calculado</Text><Text className="font-black text-purple-700 text-center">{r.markupIndice.toFixed(2)}x</Text></View>
+                    <View className="flex-row justify-between mb-4 border-t border-gray-100 pt-2"><Text className="font-bold text-xs">Mark-up Calculado</Text><Text className="font-black text-purple-700 text-center">{r.markupIndice.toFixed(2)}</Text></View>
                     <View style={{ backgroundColor: roxo }} className="p-5 rounded-3xl">
                       <Text className="text-white/70 text-[10px] font-bold uppercase text-center">Preço Sugerido com Mark-up</Text>
                       <Text className="text-white text-3xl font-black text-center mt-1">R$ {r.PVM.toFixed(2)}</Text>
