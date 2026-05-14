@@ -30,6 +30,7 @@ const InputLabel = ({ label, icon, placeholder, value, onChangeText, keyboardTyp
         backgroundColor: '#FFF', 
         color: color,
         fontSize: rf(14) 
+      }}
       className="border-2 p-4 rounded-3xl font-bold shadow-sm"
       value={value}
       onChangeText={onChangeText}

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, useWindowDimensions, Alert } from 'react-native'; // Adicionado Alert aqui
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, useWindowDimensions, Alert, PixelRatio } from 'react-native'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { AppContext } from '../context/AppContext';
 
@@ -8,6 +8,10 @@ export default function HomeScreen({ navigation }) {
   const { popularDadosTeste } = useContext(AppContext); 
   const lavanda = '#9e86bd'; 
   const roxoProfundo = '#4d235e'; 
+
+  // Lógica de Escalonamento baseada no seu Pixel 7 (largura 412)
+  const scale = width / 412;
+  const rf = (size) => Math.round(PixelRatio.roundToNearestPixel(size * scale));
 
   const responsivePaddingTop = height * 0.08;
   const responsiveMarginLogo = height * 0.04;
@@ -24,12 +28,12 @@ export default function HomeScreen({ navigation }) {
     >
       <MaterialCommunityIcons 
         name={icon} 
-        size={fullWidth ? 32 : 36} 
+        size={fullWidth ? rf(32) : rf(36)} 
         color="white" 
       />
       <Text 
-        className="text-center font-black mt-2 text-[10px] uppercase text-white"
-        style={{ letterSpacing: 1.5 }}
+        className="text-center font-black mt-2 uppercase text-white"
+        style={{ letterSpacing: 1.5, fontSize: rf(10) }}
       >
         {title}
       </Text>
@@ -49,8 +53,12 @@ export default function HomeScreen({ navigation }) {
       >
         <View className="mb-8 flex-row justify-between items-center">
           <View>
-            <Text className="text-white/70 font-bold uppercase text-[12px] tracking-widest">Seja bem-vinda ao ConectaValor</Text>
-            <Text className="text-white text-4xl font-black italic">Annik</Text>
+            <Text style={{ fontSize: rf(12) }} className="text-white/70 font-bold uppercase tracking-widest">
+              Seja bem-vinda ao ConectaValor
+            </Text>
+            <Text style={{ fontSize: rf(36) }} className="text-white font-black italic">
+              Annik
+            </Text>
           </View>
           
           <TouchableOpacity 
@@ -60,7 +68,7 @@ export default function HomeScreen({ navigation }) {
             }}
             className="bg-white/20 p-3 rounded-full border border-white/30"
           >
-            <MaterialCommunityIcons name="face-woman-outline" size={28} color="white" />
+            <MaterialCommunityIcons name="face-woman-outline" size={rf(28)} color="white" />
           </TouchableOpacity>
         </View>
 
@@ -99,7 +107,7 @@ export default function HomeScreen({ navigation }) {
           </View>
 
           <View className="mt-8 mb-4 items-center">
-            <Text className="text-white/60 text-[16px] font-bold uppercase tracking-[2px] italic text-center leading-tight">
+            <Text style={{ fontSize: rf(16) }} className="text-white/60 font-bold uppercase tracking-[2px] italic text-center leading-tight">
               "A conexão entre negócios e{"\n"}empreendedoras"
             </Text>
             <View className="h-[2px] w-10 bg-white/30 mt-4 rounded-full" />
