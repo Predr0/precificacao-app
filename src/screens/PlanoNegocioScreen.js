@@ -1,7 +1,16 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert, Dimensions, PixelRatio } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Lógica de Escalonamento baseada no seu Pixel 7 (largura 412)
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const scale = SCREEN_WIDTH / 412;
+
+function rf(size) {
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
+}
 
 const roxo = '#4d235e';
 const lavanda = '#9e86bd';
@@ -19,8 +28,8 @@ const formatarCNPJ = (txt) => {
 const InputLabel = ({ label, icon, placeholder, value, onChangeText, multiline = false, keyboardType = 'default' }) => (
   <View className="mb-5">
     <View className="flex-row items-center mb-2 ml-1">
-      <MaterialCommunityIcons name={icon} size={16} color={roxo} />
-      <Text style={{ color: roxo }} className="font-black text-[10px] uppercase ml-2 tracking-widest">{label}</Text>
+      <MaterialCommunityIcons name={icon} size={rf(16)} color={roxo} />
+      <Text style={{ color: roxo, fontSize: rf(10) }} className="font-black uppercase ml-2 tracking-widest">{label}</Text>
     </View>
     <TextInput
       placeholder={placeholder}
@@ -32,7 +41,8 @@ const InputLabel = ({ label, icon, placeholder, value, onChangeText, multiline =
         borderColor: '#F0F0F0', 
         backgroundColor: '#FFF',
         textAlignVertical: multiline ? 'top' : 'center',
-        minHeight: multiline ? 80 : 55
+        minHeight: multiline ? rf(80) : rf(55),
+        fontSize: rf(14)
       }}
       className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm"
       value={value}
@@ -52,7 +62,7 @@ export default function PlanoNegocioScreen({ navigation }) {
     propostaValor: config.propostaValor || '',
     objetivoCurtoPrazo: config.objetivoCurtoPrazo || '', 
     metaCurtoPrazo: config.metaCurtoPrazo || '',     
-    redesSociais: config.redesSociais || [], // Agora é um array
+    redesSociais: config.redesSociais || [], 
   });
 
   const [novaRede, setNovaRede] = useState('');
@@ -87,11 +97,11 @@ export default function PlanoNegocioScreen({ navigation }) {
       <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
         
         <View className="mb-8">
-          <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Identidade</Text>
+          <Text style={{ color: roxo, fontSize: rf(30) }} className="font-black uppercase tracking-tighter">Identidade</Text>
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
-          <Text style={{ color: lavanda }} className="font-black text-xs mb-4 uppercase">1. Dados Oficiais</Text>
+          <Text style={{ color: lavanda, fontSize: rf(12) }} className="font-black mb-4 uppercase">1. Dados Oficiais</Text>
           
           <InputLabel 
             label="Nome do Empreendimento" 
@@ -112,8 +122,8 @@ export default function PlanoNegocioScreen({ navigation }) {
 
           {/* Seção de Redes Sociais Dinâmica */}
           <View className="mb-2 ml-1 flex-row items-center">
-            <MaterialCommunityIcons name="at" size={16} color={roxo} />
-            <Text style={{ color: roxo }} className="font-black text-[10px] uppercase ml-2 tracking-widest">Redes Sociais / Contatos</Text>
+            <MaterialCommunityIcons name="at" size={rf(16)} color={roxo} />
+            <Text style={{ color: roxo, fontSize: rf(10) }} className="font-black uppercase ml-2 tracking-widest">Redes Sociais / Contatos</Text>
           </View>
           
           <View className="flex-row items-center mb-4">
@@ -121,7 +131,7 @@ export default function PlanoNegocioScreen({ navigation }) {
               placeholder="Ex: @seu_negocio"
               placeholderTextColor="#CCC"
               className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm flex-1 bg-white"
-              style={{ borderColor: '#F0F0F0', minHeight: 55 }}
+              style={{ borderColor: '#F0F0F0', minHeight: rf(55), fontSize: rf(14) }}
               value={novaRede}
               onChangeText={setNovaRede}
             />
@@ -130,7 +140,7 @@ export default function PlanoNegocioScreen({ navigation }) {
               style={{ backgroundColor: roxo }}
               className="ml-2 p-4 rounded-full shadow-md"
             >
-              <MaterialCommunityIcons name="plus" size={20} color="white" />
+              <MaterialCommunityIcons name="plus" size={rf(20)} color="white" />
             </TouchableOpacity>
           </View>
 
@@ -142,9 +152,9 @@ export default function PlanoNegocioScreen({ navigation }) {
                 style={{ backgroundColor: roxo }}
                 className="flex-row items-center px-4 py-2 rounded-full mr-2 mb-2 shadow-sm"
               >
-                <Text className="text-white font-bold text-xs mr-2">{rede}</Text>
+                <Text style={{ fontSize: rf(12) }} className="text-white font-bold mr-2">{rede}</Text>
                 <TouchableOpacity onPress={() => removerRede(index)}>
-                  <MaterialCommunityIcons name="close-circle" size={16} color="white" />
+                  <MaterialCommunityIcons name="close-circle" size={rf(16)} color="white" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -152,7 +162,7 @@ export default function PlanoNegocioScreen({ navigation }) {
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
-          <Text style={{ color: lavanda }} className="font-black text-xs mb-4 uppercase">2. Posicionamento</Text>
+          <Text style={{ color: lavanda, fontSize: rf(12) }} className="font-black mb-4 uppercase">2. Posicionamento</Text>
           
           <InputLabel 
             label="Nicho / Segmento" 
@@ -182,7 +192,7 @@ export default function PlanoNegocioScreen({ navigation }) {
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-10 border border-purple-100">
-          <Text style={{ color: lavanda }} className="font-black text-xs mb-4 uppercase">3. Visão de Futuro</Text>
+          <Text style={{ color: lavanda, fontSize: rf(12) }} className="font-black mb-4 uppercase">3. Visão de Futuro</Text>
           
           <InputLabel 
             label="Objetivo a Curto Prazo" 
@@ -206,8 +216,8 @@ export default function PlanoNegocioScreen({ navigation }) {
           style={{ backgroundColor: roxo }}
           className="p-6 rounded-[35px] mb-20 shadow-xl items-center flex-row justify-center"
         >
-          <MaterialCommunityIcons name="check-decagram-outline" size={24} color="white" />
-          <Text className="text-white font-black text-lg ml-3 uppercase">Confirmar Identidade</Text>
+          <MaterialCommunityIcons name="check-decagram-outline" size={rf(24)} color="white" />
+          <Text style={{ fontSize: rf(18) }} className="text-white font-black ml-3 uppercase">Confirmar Identidade</Text>
         </TouchableOpacity>
 
       </ScrollView>
