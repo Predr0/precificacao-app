@@ -1,24 +1,35 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert, Dimensions, PixelRatio } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-// 1. MOVA AS CONSTANTES DE CORES PARA FORA
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const scale = SCREEN_WIDTH / 412;
+
+function rf(size) {
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
+}
+
 const roxo = '#4d235e';
 const lavanda = '#9e86bd';
 
-// 2. MOVA O INPUTLABEL PARA FORA DA FUNÇÃO PRINCIPAL
 const InputLabel = ({ label, icon, placeholder, value, onChangeText, keyboardType = "decimal-pad", color = '#4d235e' }) => (
   <View className="mb-4">
     <View className="flex-row items-center mb-2 ml-1">
       <MaterialCommunityIcons name={icon} size={14} color={roxo} />
-      <Text style={{ color: roxo }} className="font-black text-[9px] uppercase ml-2 tracking-widest">{label}</Text>
+      <Text style={{ color: roxo, fontSize: rf(9) }} className="font-black uppercase ml-2 tracking-widest">{label}</Text>
     </View>
     <TextInput
       placeholder={placeholder}
       placeholderTextColor="#CCC"
       keyboardType={keyboardType}
-      style={{ borderColor: '#F0F0F0', backgroundColor: '#FFF', color: color }}
+      style={{ 
+        borderColor: '#F0F0F0', 
+        backgroundColor: '#FFF', 
+        color: color,
+        fontSize: rf(14) 
       className="border-2 p-4 rounded-3xl font-bold shadow-sm"
       value={value}
       onChangeText={onChangeText}
@@ -40,7 +51,6 @@ export default function ConfiguracaoNegocio({ navigation }) {
     salvarAlteracoes
   } = useContext(AppContext);
 
-  // Estados locais para os formulários de adição
   const [nomeCusto, setNomeCusto] = useState('');
   const [valorCusto, setValorCusto] = useState('');
   const [nomeColab, setNomeColab] = useState('');
@@ -93,8 +103,8 @@ export default function ConfiguracaoNegocio({ navigation }) {
       <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
         
         <View className="mb-8">
-          <Text style={{ color: roxo }} className="text-3xl font-black uppercase tracking-tighter">Capacidade</Text>
-          <Text className="text-gray-400 font-bold text-xs uppercase">Configuração do Produto</Text>
+          <Text style={{ color: roxo, fontSize: rf(30) }} className="font-black uppercase tracking-tighter">Capacidade</Text>
+          <Text style={{ fontSize: rf(12) }} className="text-gray-400 font-bold uppercase">Configuração do Produto</Text>
         </View>
 
         <View className="mb-6">
@@ -157,49 +167,46 @@ export default function ConfiguracaoNegocio({ navigation }) {
           />
         </View>
 
-        {/* ... Resto do código (Colaboradores e Custos Fixos) ... */}
-        {/* Lembre-se de manter o final do arquivo com o botão de avançar e o ScrollView */}
-        
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
-          <Text style={{ color: lavanda }} className="font-black text-[10px] mb-4 uppercase tracking-widest ml-1">Colaboradores</Text>
-          <TextInput placeholder="Nome" className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={nomeColab} onChangeText={setNomeColab} />
-          <TextInput placeholder="Salário (R$)" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={salarioColab} onChangeText={(v) => setSalarioColab(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
+          <Text style={{ color: lavanda, fontSize: rf(10) }} className="font-black mb-4 uppercase tracking-widest ml-1">Colaboradores</Text>
+          <TextInput placeholder="Nome" style={{ fontSize: rf(14) }} className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={nomeColab} onChangeText={setNomeColab} />
+          <TextInput placeholder="Salário (R$)" style={{ fontSize: rf(14) }} keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={salarioColab} onChangeText={(v) => setSalarioColab(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
           <View className="flex-row justify-between mb-4">
-            <TextInput placeholder="Dias trab/ mês" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%] border border-purple-100 font-bold text-center" value={diasColab} onChangeText={setDiasColab} />
-            <TextInput placeholder="Horas trab/ dia" keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%] border border-purple-100 font-bold text-center" value={horasColab} onChangeText={setHorasColab} />
+            <TextInput placeholder="Dias trab/ mês" style={{ fontSize: rf(14) }} keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%] border border-purple-100 font-bold text-center" value={diasColab} onChangeText={setDiasColab} />
+            <TextInput placeholder="Horas trab/ dia" style={{ fontSize: rf(14) }} keyboardType="numeric" className="bg-white p-4 rounded-2xl w-[48%] border border-purple-100 font-bold text-center" value={horasColab} onChangeText={setHorasColab} />
           </View>
           <TouchableOpacity style={{ backgroundColor: roxo }} className="p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeColab, salarioColab, listaColaboradores, setListaColaboradores, () => {setNomeColab(''); setSalarioColab(''); setDiasColab(''); setHorasColab('')})}>
-            <Text className="text-white text-center font-black text-xs uppercase">Cadastrar Colaborador</Text>
+            <Text style={{ fontSize: rf(12) }} className="text-white text-center font-black uppercase">Cadastrar Colaborador</Text>
           </TouchableOpacity>
           {listaColaboradores.map(c => (
             <View key={c.id} className="mt-3 p-4 bg-white rounded-2xl flex-row justify-between items-center border border-purple-100 shadow-sm">
               <View>
-                <Text style={{ color: roxo }} className="font-black text-xs uppercase">{c.nome}</Text>
-                <Text className="font-bold text-[10px] text-gray-400">{c.dias} dias/mês • {c.horas}h/dia</Text>
-                <Text className="font-bold text-[10px] text-gray-400">R$ {parseFloat(c.salario).toFixed(2)}</Text>
+                <Text style={{ color: roxo, fontSize: rf(12) }} className="font-black uppercase">{c.nome}</Text>
+                <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-400">{c.dias} dias/mês • {c.horas}h/dia</Text>
+                <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-400">R$ {parseFloat(c.salario).toFixed(2)}</Text>
               </View>
               <TouchableOpacity onPress={() => removerItem(c.id, listaColaboradores, setListaColaboradores)}>
-                <MaterialCommunityIcons name="delete-outline" size={20} color="#ff4444" />
+                <MaterialCommunityIcons name="delete-outline" size={rf(20)} color="#ff4444" />
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-8 border border-purple-100">
-          <Text style={{ color: lavanda }} className="font-black text-[10px] mb-4 uppercase tracking-widest ml-1">Custos Fixos da Operação</Text>
-          <TextInput placeholder="Ex: Aluguel" className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={nomeCusto} onChangeText={setNomeCusto} />
-          <TextInput placeholder="Valor Mensal(R$)" keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-4 border border-purple-100 font-bold" value={valorCusto} onChangeText={(v) => setValorCusto(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
+          <Text style={{ color: lavanda, fontSize: rf(10) }} className="font-black mb-4 uppercase tracking-widest ml-1">Custos Fixos da Operação</Text>
+          <TextInput placeholder="Ex: Aluguel" style={{ fontSize: rf(14) }} className="bg-white p-4 rounded-2xl mb-2 border border-purple-100 font-bold" value={nomeCusto} onChangeText={setNomeCusto} />
+          <TextInput placeholder="Valor Mensal(R$)" style={{ fontSize: rf(14) }} keyboardType="decimal-pad" className="bg-white p-4 rounded-2xl mb-4 border border-purple-100 font-bold" value={valorCusto} onChangeText={(v) => setValorCusto(v.replace(',', '.').replace(/[^0-9.]/g, ''))} />
           <TouchableOpacity style={{ backgroundColor: roxo }} className="p-4 rounded-2xl shadow-sm" onPress={() => validarEAdd(nomeCusto, valorCusto, listaCustosFixos, setListaCustosFixos, () => {setNomeCusto(''); setValorCusto('')})}>
-            <Text className="text-white text-center font-black text-xs uppercase">Adicionar Custo</Text>
+            <Text style={{ fontSize: rf(12) }} className="text-white text-center font-black uppercase">Adicionar Custo</Text>
           </TouchableOpacity>
           {listaCustosFixos.map(i => (
             <View key={i.id} className="mt-3 p-4 bg-white rounded-2xl flex-row justify-between items-center border border-purple-100 shadow-sm">
               <View>
-                <Text style={{ color: roxo }} className="font-black text-xs uppercase">{i.nome}</Text>
-                <Text className="font-bold text-[10px] text-gray-400">R$ {parseFloat(i.valor).toFixed(2)}</Text>
+                <Text style={{ color: roxo, fontSize: rf(12) }} className="font-black uppercase">{i.nome}</Text>
+                <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-400">R$ {parseFloat(i.valor).toFixed(2)}</Text>
               </View>
               <TouchableOpacity onPress={() => removerItem(i.id, listaCustosFixos, setListaCustosFixos)}>
-                <MaterialCommunityIcons name="delete-outline" size={20} color="#ff4444" />
+                <MaterialCommunityIcons name="delete-outline" size={rf(20)} color="#ff4444" />
               </TouchableOpacity>
             </View>
           ))}
@@ -210,8 +217,8 @@ export default function ConfiguracaoNegocio({ navigation }) {
           className="p-6 rounded-[35px] mb-20 shadow-xl flex-row justify-center items-center" 
           onPress={handleAvancar}
         >
-          <Text className="text-white text-center font-black text-xs uppercase tracking-widest">Avançar para Despesas Fixas</Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color="white" className="ml-2" />
+          <Text style={{ fontSize: rf(13) }} className="text-white text-center font-black uppercase tracking-widest">Avançar para Despesas Fixas</Text>
+          <MaterialCommunityIcons name="chevron-right" size={rf(20)} color="white" />
         </TouchableOpacity>
 
       </ScrollView>
