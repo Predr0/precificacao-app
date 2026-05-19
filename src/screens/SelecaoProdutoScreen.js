@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, FlatList, TouchableOpacity, SafeAreaView, Dimensions, PixelRatio } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, SafeAreaView, Dimensions, PixelRatio, Alert } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -13,7 +13,8 @@ function rf(size) {
 }
 
 export default function SelecaoProdutoScreen({ navigation }) {
-  const { produtos, carregarProduto, novoProduto } = useContext(AppContext);
+  // Puxando a função removerProduto do Contexto
+  const { produtos, carregarProduto, novoProduto, removerProduto } = useContext(AppContext);
 
   const handleEditar = (produto) => {
     carregarProduto(produto);
@@ -25,9 +26,29 @@ export default function SelecaoProdutoScreen({ navigation }) {
     navigation.navigate('ConfiguracaoNegocio');
   };
 
+  // Função de confirmação para segurança do usuário
+  const handleExcluir = (produto) => {
+    Alert.alert(
+      "Excluir Produto",
+      `Tem certeza que deseja remover "${produto.nome || 'este produto'}"? Toda a ficha técnica será perdida.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Excluir", 
+          style: "destructive", 
+          onPress: () => {
+            if (removerProduto) {
+              removerProduto(produto.id);
+            }
+          } 
+        }
+      ]
+    );
+  };
+
   const renderItem = ({ item }) => (
     <View className="flex-row justify-between items-center bg-white p-5 rounded-3xl mb-3 shadow-sm border border-purple-50">
-      <View className="flex-1">
+      <View className="flex-1 pr-2">
         <Text 
           style={{ fontSize: rf(18) }}
           className="text-[#4d235e] font-black uppercase"
@@ -42,12 +63,24 @@ export default function SelecaoProdutoScreen({ navigation }) {
         </Text>
       </View>
 
-      <TouchableOpacity 
-        onPress={() => handleEditar(item)}
-        className="bg-purple-100 p-3 rounded-2xl"
-      >
-        <MaterialCommunityIcons name="pencil" size={rf(24)} color="#4d235e" />
-      </TouchableOpacity>
+      {/* Container dos Botões de Ação */}
+      <View className="flex-row items-center">
+        {/* BOTÃO EXCLUIR (Lixeira em vermelho suave) */}
+        <TouchableOpacity 
+          onPress={() => handleExcluir(item)}
+          className="bg-red-50 p-3 rounded-2xl mr-2"
+        >
+          <MaterialCommunityIcons name="trash-can-outline" size={rf(22)} color="#ff4444" />
+        </TouchableOpacity>
+
+        {/* BOTÃO EDITAR */}
+        <TouchableOpacity 
+          onPress={() => handleEditar(item)}
+          className="bg-purple-100 p-3 rounded-2xl"
+        >
+          <MaterialCommunityIcons name="pencil" size={rf(22)} color="#4d235e" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
