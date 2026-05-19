@@ -3,7 +3,6 @@ import { View, Text, TextInput, ScrollView, SafeAreaView, TouchableOpacity, useW
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-// Lógica de Escalonamento baseada no seu Pixel 7 (largura 412)
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 412;
 
@@ -100,7 +99,10 @@ export default function ProjecaoVendasScreen() {
                 style={{ backgroundColor: roxo }} 
                 className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between"
               >
-                <Text style={{ fontSize: rf(16) }} className="text-white font-black uppercase text-center">{item.nome}</Text>
+                {/* FALLBACK DO NOME NA LISTA DE SELEÇÃO */}
+                <Text style={{ fontSize: rf(16) }} className="text-white font-black uppercase text-center">
+                  {item.nome?.trim() ? item.nome : "Produto sem nome"}
+                </Text>
                 <MaterialCommunityIcons name="chevron-right" size={rf(24)} color="white" />
               </TouchableOpacity>
             ))}
@@ -129,7 +131,10 @@ export default function ProjecaoVendasScreen() {
               <View className="bg-white border border-gray-100 rounded-b-[30px] shadow-sm overflow-hidden">
                 <View className="flex-row items-center p-4 border-b border-gray-50">
                   <View className="flex-1">
-                    <Text style={{ color: roxo, fontSize: rf(12) }} className="font-black uppercase">{produtoSelecionado.nome}</Text>
+                    {/* FALLBACK DO NOME DENTRO DA TABELA DE RESULTADOS */}
+                    <Text style={{ color: roxo, fontSize: rf(12) }} className="font-black uppercase">
+                      {produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome"}
+                    </Text>
                     <Text style={{ fontSize: rf(8) }} className="text-gray-400 font-bold uppercase">Base: {res.unidades} un.</Text>
                   </View>
                   <View className="w-24">

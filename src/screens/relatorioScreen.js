@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert, Dimensions, PixelRatio } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, useWindowDimensions, Dimensions, PixelRatio } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+// Lógica de Escalonamento baseada no seu Pixel 7 (largura 412)
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 412;
 
@@ -11,214 +12,238 @@ function rf(size) {
   return Math.round(PixelRatio.roundToNearestPixel(newSize));
 }
 
-const roxo = '#4d235e';
-const lavanda = '#9e86bd';
+export default function RelatoriosScreen() {
+  const { produtos } = useContext(AppContext);
+  
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+  const [abaAtiva, setAbaAtiva] = useState('geral');
+  const { height } = useWindowDimensions();
 
-const formatarCNPJ = (txt) => {
-  const limpo = txt.replace(/\D/g, '');
-  return limpo
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1/$2')
-    .replace(/(\d{4})(\d)/, '$1-$2')
-    .substring(0, 18);
-};
+  const roxo = '#4d235e';
+  const lavanda = '#9e86bd';
 
-const InputLabel = ({ label, icon, placeholder, value, onChangeText, multiline = false, keyboardType = 'default' }) => (
-  <View className="mb-5">
-    <View className="flex-row items-center mb-2 ml-1">
-      <MaterialCommunityIcons name={icon} size={rf(16)} color={roxo} />
-      <Text style={{ color: roxo, fontSize: rf(10) }} className="font-black uppercase ml-2 tracking-widest">{label}</Text>
+  const calcular = (p) => {
+    if (!p) return null;
+
+    const config = p.config;
+    const insumos = p.insumos;
+    const listaColaboradores = p.listaColaboradores;
+    const listaCustosFixos = p.listaCustosFixos;
+    const listaDespesasFixas = p.listaDespesasFixas;
+    const listaDespesasVariaveis = p.listaDespesasVariaveis;
+
+    const totalCF_Mensal = (parseFloat(config.salario) || 0) + 
+      listaColaboradores.reduce((acc, c) => acc + (parseFloat(c.salario) || 0), 0) +
+      listaCustosFixos.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+
+    const totalDF_Mensal = listaDespesasFixas.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+    const totalDV_Mensal = listaDespesasVariaveis.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+
+    const dias = parseFloat(config.dias) || 1;
+    const horas = parseFloat(config.horas) || 1;
+    const tempoProd = parseFloat(config.tempoProducao) || 1;
+    const minMes = dias * horas * 60;
+    const lucroDesejado = parseFloat(config.lucroDesejado) || 0;
+
+    const fatorRateio = tempoProd / minMes;
+
+    const CVR = insumos.reduce((acc, curr) => acc + (parseFloat(curr.custoFração) || 0), 0);
+    const CFR = totalCF_Mensal * fatorRateio;
+    const DFR = totalDF_Mensal * fatorRateio;
+    const DVR = totalDV_Mensal * fatorRateio;
+    const totalGeral = CFR + CVR + DFR + DVR;
+
+    const pDF = totalGeral > 0 ? (DFR / totalGeral) * 100 : 0;
+    const pDV = totalGeral > 0 ? (DVR / totalGeral) * 100 : 0;
+    const pCF = totalGeral > 0 ? (CFR / totalGeral) * 100 : 0;
+    const pCV = totalGeral > 0 ? (CVR / totalGeral) * 100 : 0;
+
+    const divisorMarkup = 100 - (pDF + pDV + lucroDesejado);
+    const markupIndice = divisorMarkup > 0 ? 100 / divisorMarkup : 1.0;
+
+    const PV_sem = totalGeral + (totalGeral * (lucroDesejado / 100));
+    const PVM = totalGeral * markupIndice;
+
+    return { 
+      CFR, CVR, DFR, DVR, totalGeral, PV_sem, PVM, 
+      pCF, pCV, pDF, pDV, markupIndice, 
+      totalCF_Mensal, totalDF_Mensal, totalDV_Mensal, lucroDesejado,
+      margemBrutaSem: PV_sem - CVR,
+      margemBrutaCom: PVM - CVR,
+      margemBrutaPercSem: PV_sem > 0 ? ((PV_sem - CVR) / PV_sem) * 100 : 0,
+      margemBrutaPercCom: PVM > 0 ? ((PVM - CVR) / PVM) * 100 : 0,
+      somaCF_DF_DV: CFR + DFR + DVR,
+      lucroFinalSem: PV_sem - totalGeral,
+      lucroFinalCom: PVM - totalGeral,
+      PE_Sem: (PV_sem - CVR) > 0 ? totalCF_Mensal / (PV_sem - CVR) : 0,
+      PE_Com: (PVM - CVR) > 0 ? totalCF_Mensal / (PVM - CVR) : 0,
+      fatorRateio
+    };
+  };
+
+  const r = calcular(produtoSelecionado);
+
+  const TabelaDinamica = ({ titulo, dados, valorTotal, labelTotal, cor, mostrarRateio = false, fator = 0, isCV = false }) => (
+    <View className="mb-6 border border-gray-100 rounded-[30px] overflow-hidden bg-white shadow-sm">
+      <View style={{ backgroundColor: cor }} className="p-4">
+        <Text style={{ fontSize: rf(10) }} className="text-white font-black uppercase tracking-widest text-center">{titulo}</Text>
+      </View>
+      {dados.map((item, index) => {
+        let principal = 0;
+        let rateado = 0;
+        if (isCV) {
+          principal = parseFloat(item.precoEmbalagem || 0);
+          rateado = parseFloat(item.custoFração || 0);
+        } else {
+          principal = parseFloat(item.valor || item.salario || 0);
+          rateado = principal * fator;
+        }
+        return (
+          <View key={index} className="flex-row justify-between p-4 border-b border-gray-50">
+            <Text style={{ fontSize: rf(11) }} className="text-gray-500 flex-1">{item.nome || 'Item'}</Text>
+            <View className="items-end">
+              <Text style={{ fontSize: rf(11) }} className="font-bold text-gray-800">
+                R$ {principal.toFixed(2)}
+                {mostrarRateio && (
+                  <Text style={{ color: lavanda }} className="font-medium"> ({rateado.toFixed(2)})</Text>
+                )}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+      <View className="bg-gray-50 p-4 flex-row justify-between">
+        <Text style={{ fontSize: rf(9) }} className="font-black text-gray-400 uppercase">{labelTotal}</Text>
+        <Text style={{ color: roxo, fontSize: rf(12) }} className="font-black text-center">R$ {valorTotal.toFixed(2)}</Text>
+      </View>
     </View>
-    <TextInput
-      placeholder={placeholder}
-      placeholderTextColor="#CCC"
-      multiline={multiline}
-      keyboardType={keyboardType}
-      numberOfLines={multiline ? 3 : 1}
-      style={{ 
-        borderColor: '#F0F0F0', 
-        backgroundColor: '#FFF',
-        textAlignVertical: multiline ? 'top' : 'center',
-        minHeight: multiline ? rf(80) : rf(55),
-        fontSize: rf(14)
-      }}
-      className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm"
-      value={value}
-      onChangeText={onChangeText}
-    />
-  </View>
-);
+  );
 
-export default function PlanoNegocioScreen({ navigation }) {
-  const { config, setConfig } = useContext(AppContext);
-
-  const [dados, setDados] = useState({
-    nomeNegocio: config.nomeNegocio || '',
-    cnpj: config.cnpj || '',
-    segmento: config.segmento || '',
-    descricao: config.descricao || '',
-    propostaValor: config.propostaValor || '',
-    objetivoCurtoPrazo: config.objetivoCurtoPrazo || '', 
-    metaCurtoPrazo: config.metaCurtoPrazo || '',     
-    redesSociais: config.redesSociais || [], 
-  });
-
-  const [novaRede, setNovaRede] = useState('');
-
-  const adicionarRede = () => {
-    if (novaRede.trim() === '') return;
-    setDados({
-      ...dados,
-      redesSociais: [...dados.redesSociais, novaRede.trim()]
-    });
-    setNovaRede('');
-  };
-
-  const removerRede = (index) => {
-    const atualizadas = dados.redesSociais.filter((_, i) => i !== index);
-    setDados({ ...dados, redesSociais: atualizadas });
-  };
-
-  const salvar = () => {
-    if (!dados.nomeNegocio) {
-      Alert.alert("Atenção", "O nome do negócio é essencial para a identidade.");
-      return;
-    }
-    setConfig({ ...config, ...dados });
-    Alert.alert("Sucesso", "Identidade do negócio atualizada!", [
-      { text: "OK", onPress: () => navigation.goBack() }
-    ]);
-  };
+  const LinhaFormacao = ({ label, valor, porcentagem, negrito = false, corFundo = 'transparent', corTexto = '#4b5563' }) => (
+    <View style={{ backgroundColor: corFundo }} className="flex-row justify-between p-4 border-b border-gray-50 items-center">
+      <Text style={{ color: corTexto, fontSize: rf(12) }} className={`flex-1 ${negrito ? 'font-black' : 'font-medium'}`}>{label}</Text>
+      <Text style={{ color: corTexto, fontSize: rf(12) }} className={`w-24 text-right ${negrito ? 'font-black' : 'font-bold'}`}>R$ {valor.toFixed(2)}</Text>
+      <Text style={{ color: corTexto, fontSize: rf(12) }} className={`w-16 text-right ${negrito ? 'font-black' : 'font-bold'}`}>{porcentagem}</Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ backgroundColor: '#F9F9FF', flex: 1 }}>
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: height * 0.05, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
         
-        <View className="mb-8">
-          <Text style={{ color: roxo, fontSize: rf(30) }} className="font-black uppercase tracking-tighter">Identidade</Text>
+        <View className="mb-8 flex-row justify-between items-end">
+          <View>
+            <Text style={{ color: roxo, fontSize: rf(30) }} className="text-3xl font-black uppercase tracking-tighter">Relatórios</Text>
+            {produtoSelecionado && (
+              <Text style={{ color: roxo, fontSize: rf(10) }} className="font-bold uppercase mt-1">
+                {/* ALTERADO: Fallback do nome na barra de análise */}
+                Analisando: <Text className="font-black">{produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome"}</Text>
+              </Text>
+            )}
+          </View>
+          {produtoSelecionado && (
+            <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
+              <MaterialCommunityIcons name="swap-horizontal" size={rf(32)} color={roxo} />
+            </TouchableOpacity>
+          )}
         </View>
 
-        <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
-          <Text style={{ color: lavanda, fontSize: rf(12) }} className="font-black mb-4 uppercase">1. Dados Oficiais</Text>
-          
-          <InputLabel 
-            label="Nome do Empreendimento" 
-            icon="store-outline"
-            placeholder="Ex: Annik Doceria"
-            value={dados.nomeNegocio}
-            onChangeText={(t) => setDados({...dados, nomeNegocio: t})}
-          />
-
-          <InputLabel 
-            label="CNPJ (Opcional)" 
-            icon="card-account-details-outline"
-            placeholder="00.000.000/0000-00"
-            keyboardType="numeric"
-            value={dados.cnpj}
-            onChangeText={(t) => setDados({...dados, cnpj: formatarCNPJ(t)})}
-          />
-
-          {/* Seção de Redes Sociais Dinâmica */}
-          <View className="mb-2 ml-1 flex-row items-center">
-            <MaterialCommunityIcons name="at" size={rf(16)} color={roxo} />
-            <Text style={{ color: roxo, fontSize: rf(10) }} className="font-black uppercase ml-2 tracking-widest">Redes Sociais / Contatos</Text>
-          </View>
-          
-          <View className="flex-row items-center mb-4">
-            <TextInput
-              placeholder="Ex: @seu_negocio"
-              placeholderTextColor="#CCC"
-              className="border-2 p-4 rounded-3xl font-bold text-gray-700 shadow-sm flex-1 bg-white"
-              style={{ borderColor: '#F0F0F0', minHeight: rf(55), fontSize: rf(14) }}
-              value={novaRede}
-              onChangeText={setNovaRede}
-            />
-            <TouchableOpacity 
-              onPress={adicionarRede}
-              style={{ backgroundColor: roxo }}
-              className="ml-2 p-4 rounded-full shadow-md"
-            >
-              <MaterialCommunityIcons name="plus" size={rf(20)} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Listagem das redes adicionadas */}
-          <View className="flex-row flex-wrap mb-4">
-            {dados.redesSociais.map((rede, index) => (
-              <View 
-                key={index} 
-                style={{ backgroundColor: roxo }}
-                className="flex-row items-center px-4 py-2 rounded-full mr-2 mb-2 shadow-sm"
-              >
-                <Text style={{ fontSize: rf(12) }} className="text-white font-bold mr-2">{rede}</Text>
-                <TouchableOpacity onPress={() => removerRede(index)}>
-                  <MaterialCommunityIcons name="close-circle" size={rf(16)} color="white" />
-                </TouchableOpacity>
-              </View>
+        {!produtoSelecionado ? (
+          <View>
+            <Text style={{ fontSize: rf(10) }} className="text-gray-400 font-bold uppercase mb-4 ml-2">Selecione o produto:</Text>
+            {produtos.map((item) => (
+              <TouchableOpacity key={item.id} onPress={() => setProdutoSelecionado(item)} style={{ backgroundColor: roxo }} className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between">
+                {/* ALTERADO: Fallback do nome na lista de seleção */}
+                <Text style={{ fontSize: rf(14) }} className="text-white font-black uppercase text-center">
+                  {item.nome?.trim() ? item.nome : "Produto sem nome"}
+                </Text>
+                <MaterialCommunityIcons name="chevron-right" size={rf(24)} color="white" />
+              </TouchableOpacity>
             ))}
           </View>
-        </View>
+        ) : (
+          <View>
+            {/* SELETOR DE ABAS (AS 3 OPÇÕES ORIGINAIS) */}
+            <View className="flex-row bg-gray-200 p-1 rounded-2xl mb-8">
+              {['geral', 'formacao', 'margem'].map((item) => (
+                <TouchableOpacity key={item} onPress={() => setAbaAtiva(item)} className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}>
+                  <Text style={{ color: abaAtiva === item ? roxo : '#9ca3af', fontSize: rf(8) }} className="text-center font-black uppercase">
+                    {item === 'geral' ? 'Visão Geral' : item === 'formacao' ? 'Preço de Venda' : 'Rentabilidade'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
-        <View className="bg-purple-50/50 p-6 rounded-[40px] mb-6 border border-purple-100">
-          <Text style={{ color: lavanda, fontSize: rf(12) }} className="font-black mb-4 uppercase">2. Posicionamento</Text>
-          
-          <InputLabel 
-            label="Nicho / Segmento" 
-            icon="tag-outline"
-            placeholder="Ex: Confeitaria Artesanal"
-            value={dados.segmento}
-            onChangeText={(t) => setDados({...dados, segmento: t})}
-          />
+            {abaAtiva === 'geral' && (
+              <View>
+                <TabelaDinamica 
+                  titulo="Custos Fixos (Mês vs Rateio)" 
+                  dados={[
+                    { nome: "Pró-labore (Dono)", salario: produtoSelecionado.config.salario },
+                    ...produtoSelecionado.listaColaboradores,
+                    ...produtoSelecionado.listaCustosFixos
+                  ]} 
+                  valorTotal={r.CFR} 
+                  labelTotal="Total CF Unitário" 
+                  cor={roxo} 
+                  mostrarRateio={true}
+                  fator={r.fatorRateio}
+                />
+                <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total Material Unidade" cor={roxo} mostrarRateio={true} isCV={true} />
+                <TabelaDinamica titulo="Despesas Fixas" dados={produtoSelecionado.listaDespesasFixas} valorTotal={r.DFR} labelTotal="Total DF Rateado" cor={roxo} mostrarRateio={true} fator={r.fatorRateio} />
+                <TabelaDinamica titulo="Despesas Variáveis" dados={produtoSelecionado.listaDespesasVariaveis} valorTotal={r.DVR} labelTotal="Total DV Rateado" cor={roxo} mostrarRateio={true} fator={r.fatorRateio} />
+                
+                <View className="bg-white border border-gray-200 rounded-[35px] overflow-hidden mb-8 shadow-sm">
+                  <View style={{ backgroundColor: lavanda }} className="p-4">
+                    <Text style={{ fontSize: rf(10) }} className="font-black uppercase text-center text-white">Motor de Precificação</Text>
+                  </View>
+                  <View className="p-5">
+                    <View className="flex-row justify-between mb-2"><Text style={{ fontSize: rf(12) }} className="text-gray-500">Custo Unitário Total</Text><Text style={{ fontSize: rf(12) }} className="font-bold">R$ {r.totalGeral.toFixed(2)}</Text></View>
+                    <View className="flex-row justify-between mb-2"><Text style={{ fontSize: rf(12) }} className="text-gray-500">Preço de Venda (Simples)</Text><Text style={{ fontSize: rf(12) }} className="font-bold">R$ {r.PV_sem.toFixed(2)}</Text></View>
+                    <View className="flex-row justify-between mb-4 border-t border-gray-100 pt-2"><Text style={{ fontSize: rf(12) }} className="font-bold">Mark-up Calculado</Text><Text style={{ fontSize: rf(12) }} className="font-black text-purple-700">{r.markupIndice.toFixed(2)}</Text></View>
+                    <View style={{ backgroundColor: roxo }} className="p-5 rounded-3xl">
+                      <Text style={{ fontSize: rf(10) }} className="text-white/70 font-bold uppercase text-center">Preço Sugerido com Mark-up</Text>
+                      <Text style={{ fontSize: rf(30) }} className="text-white font-black text-center mt-1">R$ {r.PVM.toFixed(2)}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
 
-          <InputLabel 
-            label="O que seu negócio faz?" 
-            icon="text-box-outline"
-            placeholder="Descreva brevemente seus produtos ou serviços..."
-            multiline
-            value={dados.descricao}
-            onChangeText={(t) => setDados({...dados, descricao: t})}
-          />
+            {abaAtiva === 'formacao' && (
+              <View className="mb-6 border border-gray-100 rounded-[40px] overflow-hidden bg-white shadow-xl">
+                <View style={{ backgroundColor: '#f3f4f6' }} className="p-5 flex-row justify-between">
+                  <Text style={{ fontSize: rf(9) }} className="font-black uppercase text-gray-400">Descrição</Text>
+                  <View className="flex-row">
+                    <Text style={{ fontSize: rf(9) }} className="font-black uppercase text-gray-400 w-24 text-right">Valor (R$)</Text>
+                    <Text style={{ fontSize: rf(9) }} className="font-black uppercase text-gray-400 w-16 text-right">%</Text>
+                  </View>
+                </View>
+                <LinhaFormacao label="Custo variável (CV)" valor={r.CVR} porcentagem={`${r.pCV.toFixed(2)}%`} />
+                <LinhaFormacao label="Custos fixos (CF)" valor={r.CFR} porcentagem={`${r.pCF.toFixed(2)}%`} />
+                <LinhaFormacao label="Despesas fixas (DF)" valor={r.DFR} porcentagem={`${r.pDF.toFixed(2)}%`} />
+                <LinhaFormacao label="Despesas variáveis (DV)" valor={r.DVR} porcentagem={`${r.pDV.toFixed(2)}%`} />
+                <LinhaFormacao label="TOTAL GERAL" valor={r.totalGeral} porcentagem="100%" negrito corFundo="#f9fafb" />
+                <LinhaFormacao label="Margem de lucro desejada" valor={r.totalGeral * (r.lucroDesejado/100)} porcentagem={`${r.lucroDesejado}%`} />
+                <View style={{ backgroundColor: roxo }} className="flex-row justify-between p-5"><Text style={{ fontSize: rf(12) }} className="text-white font-black uppercase">Preço com Mark-up</Text><Text style={{ fontSize: rf(12) }} className="text-white font-black text-right">R$ {r.PVM.toFixed(2)}</Text></View>
+              </View>
+            )}
 
-          <InputLabel 
-            label="Proposta de Valor" 
-            icon="star-outline"
-            placeholder="Qual o seu diferencial no mercado?"
-            multiline
-            value={dados.propostaValor}
-            onChangeText={(t) => setDados({...dados, propostaValor: t})}
-          />
-        </View>
-
-        <View className="bg-purple-50/50 p-6 rounded-[40px] mb-10 border border-purple-100">
-          <Text style={{ color: lavanda, fontSize: rf(12) }} className="font-black mb-4 uppercase">3. Visão de Futuro</Text>
-          
-          <InputLabel 
-            label="Objetivo a Curto Prazo" 
-            icon="target"
-            placeholder="Aumentar as vendas a cada mês"
-            value={dados.objetivoCurtoPrazo}
-            onChangeText={(t) => setDados({...dados, objetivoCurtoPrazo: t})}
-          />
-          <InputLabel
-            label="Metas a Curto Prazo"
-            icon="chart-line"
-            placeholder="Ex: Crescer 5% no faturamento em janeiro"
-            multiline
-            value={dados.metaCurtoPrazo}
-            onChangeText={(t) => setDados({...dados, metaCurtoPrazo: t})}
-          />
-        </View>
-
-        <TouchableOpacity 
-          onPress={salvar}
-          style={{ backgroundColor: roxo }}
-          className="p-6 rounded-[35px] mb-20 shadow-xl items-center flex-row justify-center"
-        >
-          <MaterialCommunityIcons name="check-decagram-outline" size={rf(24)} color="white" />
-          <Text style={{ fontSize: rf(18) }} className="text-white font-black ml-3 uppercase">Confirmar Identidade</Text>
-        </TouchableOpacity>
-
+            {abaAtiva === 'margem' && (
+              <View className="mb-6 border border-gray-100 rounded-[40px] overflow-hidden bg-white shadow-xl">
+                <View style={{ backgroundColor: roxo }} className="p-5 flex-row justify-between">
+                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase flex-1">Indicador</Text>
+                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase w-20 text-right">Simples</Text>
+                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase w-20 text-right">Mark-up</Text>
+                </View>
+                <View className="flex-row justify-between p-4 border-b border-gray-50"><Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Preço de Venda</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right">R$ {r.PV_sem.toFixed(2)}</Text><Text style={{ color: roxo, fontSize: rf(12) }} className="w-20 text-right font-black">R$ {r.PVM.toFixed(2)}</Text></View>
+                <View className="flex-row justify-between p-4 border-b border-gray-50"><Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Margem Bruta (R$)</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right">R$ {r.margemBrutaSem.toFixed(2)}</Text><Text style={{ color: roxo, fontSize: rf(12) }} className="w-20 text-right font-black">R$ {r.margemBrutaCom.toFixed(2)}</Text></View>
+                <View className="flex-row justify-between p-4 border-b border-gray-50 bg-purple-50"><Text style={{ fontSize: rf(10) }} className="font-black text-purple-900 flex-1 uppercase">Lucro Real</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right font-bold">R$ {r.lucroFinalSem.toFixed(2)}</Text><Text style={{ fontSize: rf(12) }} className="text-purple-900 w-20 text-right font-black">R$ {r.lucroFinalCom.toFixed(2)}</Text></View>
+                <View className="flex-row justify-between p-4 bg-gray-50"><Text style={{ fontSize: rf(10) }} className="font-bold text-gray-400 flex-1 uppercase">Ponto de Equilíbrio</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right text-gray-400">{Math.ceil(r.PE_Sem)} un</Text><Text style={{ color: roxo, fontSize: rf(12) }} className="w-20 text-right font-black">{Math.ceil(r.PE_Com)} un</Text></View>
+              </View>
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
