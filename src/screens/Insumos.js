@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Aler
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-// Lógica de Escalonamento baseada no seu Pixel 7 (largura 412)
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 412;
 
@@ -190,7 +189,7 @@ export default function Insumos({ navigation }) {
                 className="p-4 rounded-2xl" 
                 onPress={confirmarNovaUnidade}
               >
-                <Text style={{ fontSize: rf(12) }} className="text-white text-center font-black uppercase text-center">Confirmar</Text>
+                <Text style={{ fontSize: rf(12) }} className="text-white text-center font-black uppercase">Confirmar</Text>
               </TouchableOpacity>
             </View>
           </View>

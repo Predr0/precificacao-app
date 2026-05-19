@@ -5,7 +5,8 @@ import { AppContext } from '../context/AppContext';
 
 export default function HomeScreen({ navigation }) {
   const { height, width } = useWindowDimensions();
-  const { popularDadosTeste } = useContext(AppContext); 
+  // Destruturado o "config" aqui para ter acesso ao nome salvo
+  const { popularDadosTeste, config } = useContext(AppContext); 
   const lavanda = '#9e86bd'; 
   const roxoProfundo = '#4d235e'; 
 
@@ -56,8 +57,9 @@ export default function HomeScreen({ navigation }) {
             <Text style={{ fontSize: rf(12) }} className="text-white/70 font-bold uppercase tracking-widest">
               Seja bem-vinda ao ConectaValor
             </Text>
+            {/* LÓGICA DINÂMICA DO NOME IMPLEMENTADA AQUI */}
             <Text style={{ fontSize: rf(36) }} className="text-white font-black italic">
-              Annik
+              {config?.nomeNegocio?.trim() ? config.nomeNegocio : 'EMPREENDEDORA'}
             </Text>
           </View>
           
