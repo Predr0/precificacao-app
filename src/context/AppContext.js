@@ -1,4 +1,5 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const AppContext = createContext();
 
@@ -17,6 +18,35 @@ export const AppProvider = ({ children }) => {
   const [listaDespesasVariaveis, setListaDespesasVariaveis] = useState([]);
 
   const [unidades, setUnidades] = useState(['unid', 'kg', 'g', 'm', 'cm']);
+
+  // --- PERSISTÊNCIA DE DADOS (ASYNC STORAGE) ---
+
+  // 1. Carrega os dados quando o aplicativo abre
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        const dadosSalvos = await AsyncStorage.getItem('@conectaValor_produtos');
+        if (dadosSalvos) {
+          setProdutos(JSON.parse(dadosSalvos));
+        }
+      } catch (error) {
+        console.error("Erro ao carregar do AsyncStorage:", error);
+      }
+    };
+    carregarDados();
+  }, []);
+
+  // 2. Salva os dados toda vez que a lista de produtos for alterada
+  useEffect(() => {
+    const salvarDados = async () => {
+      try {
+        await AsyncStorage.setItem('@conectaValor_produtos', JSON.stringify(produtos));
+      } catch (error) {
+        console.error("Erro ao salvar no AsyncStorage:", error);
+      }
+    };
+    salvarDados();
+  }, [produtos]);
 
   // --- FUNÇÕES DE GESTÃO DE CONTEXTO ---
 
@@ -77,7 +107,10 @@ export const AppProvider = ({ children }) => {
     setLista(lista.filter(item => item.id !== id));
   };
 
-  
+  const removerProduto = (idProduto) => {
+    setProdutos(prev => prev.filter(p => p.id !== idProduto));
+  };
+
   const totalCF_Mensal = (parseFloat(config.salario) || 0) + 
     listaColaboradores.reduce((acc, c) => acc + (parseFloat(c.salario) || 0), 0) +
     listaCustosFixos.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
@@ -119,6 +152,7 @@ export const AppProvider = ({ children }) => {
       unidades, setUnidades,
       totalCF_Mensal, totalDF_Mensal, totalDV_Mensal,
       removerItem, 
+      removerProduto, // Exportando a função da lixeira aqui
       popularDadosTeste, 
       carregarProduto, 
       salvarAlteracoes,
