@@ -8,9 +8,28 @@ export const AppProvider = ({ children }) => {
   const [produtos, setProdutos] = useState([]);
   const [idProdutoAtivo, setIdProdutoAtivo] = useState(null);
 
-  // --- ESTADOS DO EDITOR (BUFFER DO PRODUTO ATUAL) ---
+  // --- ESTADOS DO EDITOR (BUFFER DO PRODUTO ATUAL + IDENTIDADE DO NEGÓCIO) ---
   const [nomeProduto, setNomeProduto] = useState('');
-  const [config, setConfig] = useState({ salario: '', dias: '', horas: '', tempoProducao: '', lucroDesejado: '30' });
+  
+  // Inicializado com os campos do Produto E do Plano de Negócio unificados
+  const [config, setConfig] = useState({ 
+    // Campos do Produto
+    salario: '', 
+    dias: '', 
+    horas: '', 
+    tempoProducao: '', 
+    lucroDesejado: '30',
+    // Campos do Plano de Negócio (Identidade)
+    nomeNegocio: '',
+    cnpj: '',
+    segmento: '',
+    descricao: '',
+    propostaValor: '',
+    objetivoCurtoPrazo: '',
+    metaCurtoPrazo: '',
+    redesSociais: []
+  });
+
   const [insumos, setInsumos] = useState([]);
   const [listaCustosFixos, setListaCustosFixos] = useState([]);
   const [listaColaboradores, setListaColaboradores] = useState([]);
@@ -21,32 +40,49 @@ export const AppProvider = ({ children }) => {
 
   // --- PERSISTÊNCIA DE DADOS (ASYNC STORAGE) ---
 
-  // 1. Carrega os dados quando o aplicativo abre
+  // 1. Carrega os PRODUTOS e a CONFIGURAÇÃO local quando o app inicia
   useEffect(() => {
-    const carregarDados = async () => {
+    const carregarDadosLocais = async () => {
       try {
-        const dadosSalvos = await AsyncStorage.getItem('@conectaValor_produtos');
-        if (dadosSalvos) {
-          setProdutos(JSON.parse(dadosSalvos));
+        const produtosSalvos = await AsyncStorage.getItem('@conectaValor_produtos');
+        const configSalva = await AsyncStorage.getItem('@conectaValor_config');
+        
+        if (produtosSalvos) {
+          setProdutos(JSON.parse(produtosSalvos));
+        }
+        if (configSalva) {
+          setConfig(JSON.parse(configSalva));
         }
       } catch (error) {
-        console.error("Erro ao carregar do AsyncStorage:", error);
+        console.error("Erro ao carregar dados do dispositivo:", error);
       }
     };
-    carregarDados();
+    carregarDadosLocais();
   }, []);
 
-  // 2. Salva os dados toda vez que a lista de produtos for alterada
+  // 2. Grava automaticamente os PRODUTOS sempre que a lista sofrer alterações
   useEffect(() => {
-    const salvarDados = async () => {
+    const salvarProdutos = async () => {
       try {
         await AsyncStorage.setItem('@conectaValor_produtos', JSON.stringify(produtos));
       } catch (error) {
-        console.error("Erro ao salvar no AsyncStorage:", error);
+        console.error("Erro ao salvar produtos localmente:", error);
       }
     };
-    salvarDados();
+    salvarProdutos();
   }, [produtos]);
+
+  // 3. Grava automaticamente a IDENTIDADE (config) sempre que o plano de negócio mudar
+  useEffect(() => {
+    const salvarConfig = async () => {
+      try {
+        await AsyncStorage.setItem('@conectaValor_config', JSON.stringify(config));
+      } catch (error) {
+        console.error("Erro ao salvar configurações locais:", error);
+      }
+    };
+    salvarConfig();
+  }, [config]);
 
   // --- FUNÇÕES DE GESTÃO DE CONTEXTO ---
 
@@ -69,16 +105,22 @@ export const AppProvider = ({ children }) => {
     return novoId;
   };
 
-  // Mapeia os dados de um objeto produto para os estados de edição
+  // Mapeia os dados de um objeto produto fazendo um MERGE inteligente para proteger os dados da empresa
   const carregarProduto = (produto) => {
     setIdProdutoAtivo(produto.id);
     setNomeProduto(produto.nome || '');
-    setConfig(produto.config);
-    setInsumos(produto.insumos);
-    setListaCustosFixos(produto.listaCustosFixos);
-    setListaColaboradores(produto.listaColaboradores);
-    setListaDespesasFixas(produto.listaDespesasFixas);
-    setListaDespesasVariaveis(produto.listaDespesasVariaveis);
+    
+    // Protege o Plano de Negócio: mantém os dados da empresa vivos e atualiza só os do produto
+    setConfig(prev => ({
+      ...prev,
+      ...produto.config
+    }));
+
+    setInsumos(produto.insumos || []);
+    setListaCustosFixos(produto.listaCustosFixos || []);
+    setListaColaboradores(produto.listaColaboradores || []);
+    setListaDespesasFixas(produto.listaDespesasFixas || []);
+    setListaDespesasVariaveis(produto.listaDespesasVariaveis || []);
   };
 
   const salvarAlteracoes = () => {
@@ -90,7 +132,14 @@ export const AppProvider = ({ children }) => {
           return {
             ...p,
             nome: nomeProduto,
-            config,
+            // Salva na ficha do produto apenas as chaves pertinentes a ele
+            config: {
+              salario: config.salario,
+              dias: config.dias,
+              horas: config.horas,
+              tempoProducao: config.tempoProducao,
+              lucroDesejado: config.lucroDesejado,
+            },
             insumos,
             listaCustosFixos,
             listaColaboradores,
@@ -110,7 +159,7 @@ export const AppProvider = ({ children }) => {
   const removerProduto = (idProduto) => {
     setProdutos(prev => prev.filter(p => p.id !== idProduto));
   };
-
+  
   const totalCF_Mensal = (parseFloat(config.salario) || 0) + 
     listaColaboradores.reduce((acc, c) => acc + (parseFloat(c.salario) || 0), 0) +
     listaCustosFixos.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
@@ -152,7 +201,7 @@ export const AppProvider = ({ children }) => {
       unidades, setUnidades,
       totalCF_Mensal, totalDF_Mensal, totalDV_Mensal,
       removerItem, 
-      removerProduto, // Exportando a função da lixeira aqui
+      removerProduto,
       popularDadosTeste, 
       carregarProduto, 
       salvarAlteracoes,
