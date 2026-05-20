@@ -11,7 +11,6 @@ export const AppProvider = ({ children }) => {
   // --- ESTADOS DO EDITOR (BUFFER DO PRODUTO ATUAL + IDENTIDADE DO NEGÓCIO) ---
   const [nomeProduto, setNomeProduto] = useState('');
   
-  // Inicializado com os campos do Produto E do Plano de Negócio unificados
   const [config, setConfig] = useState({ 
     // Campos do Produto
     salario: '', 
@@ -40,7 +39,7 @@ export const AppProvider = ({ children }) => {
 
   // --- PERSISTÊNCIA DE DADOS (ASYNC STORAGE) ---
 
-  // 1. Carrega os PRODUTOS e a CONFIGURAÇÃO local quando o app inicia
+  // 1. Carrega os PRODUTOS e a CONFIGURAÇÃO local quando o app inicia (Roda uma única vez)
   useEffect(() => {
     const carregarDadosLocais = async () => {
       try {
@@ -60,33 +59,72 @@ export const AppProvider = ({ children }) => {
     carregarDadosLocais();
   }, []);
 
-  // 2. Grava automaticamente os PRODUTOS sempre que a lista sofrer alterações
+  // 2. CORRIGIDO: Salva os PRODUTOS com Debounce (Espera 1 segundo de inatividade para gravar no disco)
   useEffect(() => {
-    const salvarProdutos = async () => {
+    const delayDebounce = setTimeout(async () => {
       try {
         await AsyncStorage.setItem('@conectaValor_produtos', JSON.stringify(produtos));
       } catch (error) {
         console.error("Erro ao salvar produtos localmente:", error);
       }
-    };
-    salvarProdutos();
+    }, 1000); // 1000 milissegundos = 1 segundo
+
+    return () => clearTimeout(delayDebounce); // Cancela o timer se o usuário voltar a digitar rápido
   }, [produtos]);
 
-  // 3. Grava automaticamente a IDENTIDADE (config) sempre que o plano de negócio mudar
+  // 3. CORRIGIDO: Salva a CONFIGURAÇÃO (Plano de Negócio) com Debounce
   useEffect(() => {
-    const salvarConfig = async () => {
+    const delayDebounce = setTimeout(async () => {
       try {
         await AsyncStorage.setItem('@conectaValor_config', JSON.stringify(config));
       } catch (error) {
         console.error("Erro ao salvar configurações locais:", error);
       }
-    };
-    salvarConfig();
+    }, 1000);
+
+    return () => clearTimeout(delayDebounce);
   }, [config]);
+
+  // 4. SINCRONIZAÇÃO AUTOMÁTICA EM TEMPO REAL (BUFFER -> LISTA GLOBAL)
+  useEffect(() => {
+    if (!idProdutoAtivo) return;
+
+    setProdutos(prevProdutos => 
+      prevProdutos.map(p => {
+        if (p.id === idProdutoAtivo) {
+          return {
+            ...p,
+            nome: nomeProduto,
+            config: {
+              salario: config.salario,
+              dias: config.dias,
+              horas: config.horas,
+              tempoProducao: config.tempoProducao,
+              lucroDesejado: config.lucroDesejado,
+            },
+            insumos,
+            listaCustosFixos,
+            listaColaboradores,
+            listaDespesasFixas,
+            listaDespesasVariaveis,
+          };
+        }
+        return p;
+      })
+    );
+  }, [
+    nomeProduto, 
+    config.salario, config.dias, config.horas, config.tempoProducao, config.lucroDesejado, 
+    insumos, 
+    listaCustosFixos, 
+    listaColaboradores, 
+    listaDespesasFixas, 
+    listaDespesasVariaveis,
+    idProdutoAtivo
+  ]);
 
   // --- FUNÇÕES DE GESTÃO DE CONTEXTO ---
 
-  // Prepara o editor para um novo produto do zero
   const novoProduto = () => {
     const novoId = Date.now().toString();
     const baseProduto = {
@@ -105,12 +143,10 @@ export const AppProvider = ({ children }) => {
     return novoId;
   };
 
-  // Mapeia os dados de um objeto produto fazendo um MERGE inteligente para proteger os dados da empresa
   const carregarProduto = (produto) => {
     setIdProdutoAtivo(produto.id);
     setNomeProduto(produto.nome || '');
     
-    // Protege o Plano de Negócio: mantém os dados da empresa vivos e atualiza só os do produto
     setConfig(prev => ({
       ...prev,
       ...produto.config
@@ -132,7 +168,6 @@ export const AppProvider = ({ children }) => {
           return {
             ...p,
             nome: nomeProduto,
-            // Salva na ficha do produto apenas as chaves pertinentes a ele
             config: {
               salario: config.salario,
               dias: config.dias,
