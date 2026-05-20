@@ -136,7 +136,6 @@ export default function RelatoriosScreen() {
             <Text style={{ color: roxo, fontSize: rf(30) }} className="text-3xl font-black uppercase tracking-tighter">Relatórios</Text>
             {produtoSelecionado && (
               <Text style={{ color: roxo, fontSize: rf(10) }} className="font-bold uppercase mt-1">
-                {/* ALTERADO: Fallback do nome na barra de análise */}
                 Analisando: <Text className="font-black">{produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome"}</Text>
               </Text>
             )}
@@ -153,7 +152,6 @@ export default function RelatoriosScreen() {
             <Text style={{ fontSize: rf(10) }} className="text-gray-400 font-bold uppercase mb-4 ml-2">Selecione o produto:</Text>
             {produtos.map((item) => (
               <TouchableOpacity key={item.id} onPress={() => setProdutoSelecionado(item)} style={{ backgroundColor: roxo }} className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between">
-                {/* ALTERADO: Fallback do nome na lista de seleção */}
                 <Text style={{ fontSize: rf(14) }} className="text-white font-black uppercase text-center">
                   {item.nome?.trim() ? item.nome : "Produto sem nome"}
                 </Text>
@@ -163,7 +161,7 @@ export default function RelatoriosScreen() {
           </View>
         ) : (
           <View>
-            {/* SELETOR DE ABAS (AS 3 OPÇÕES ORIGINAIS) */}
+            {/* SELETOR DE ABAS */}
             <View className="flex-row bg-gray-200 p-1 rounded-2xl mb-8">
               {['geral', 'formacao', 'margem'].map((item) => (
                 <TouchableOpacity key={item} onPress={() => setAbaAtiva(item)} className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}>
@@ -229,17 +227,64 @@ export default function RelatoriosScreen() {
               </View>
             )}
 
+            {/* ABA RENTABILIDADE COMPLETA CONFORME O MODELO SOLICITADO */}
             {abaAtiva === 'margem' && (
               <View className="mb-6 border border-gray-100 rounded-[40px] overflow-hidden bg-white shadow-xl">
+                {/* Cabeçalho da Tabela de Rentabilidade */}
                 <View style={{ backgroundColor: roxo }} className="p-5 flex-row justify-between">
                   <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase flex-1">Indicador</Text>
-                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase w-20 text-right">Simples</Text>
-                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase w-20 text-right">Mark-up</Text>
+                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase w-24 text-right">Valor</Text>
+                  <Text style={{ fontSize: rf(9) }} className="text-white font-black uppercase w-24 text-right">Valor com Mark-up</Text>
                 </View>
-                <View className="flex-row justify-between p-4 border-b border-gray-50"><Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Preço de Venda</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right">R$ {r.PV_sem.toFixed(2)}</Text><Text style={{ color: roxo, fontSize: rf(12) }} className="w-20 text-right font-black">R$ {r.PVM.toFixed(2)}</Text></View>
-                <View className="flex-row justify-between p-4 border-b border-gray-50"><Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Margem Bruta (R$)</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right">R$ {r.margemBrutaSem.toFixed(2)}</Text><Text style={{ color: roxo, fontSize: rf(12) }} className="w-20 text-right font-black">R$ {r.margemBrutaCom.toFixed(2)}</Text></View>
-                <View className="flex-row justify-between p-4 border-b border-gray-50 bg-purple-50"><Text style={{ fontSize: rf(10) }} className="font-black text-purple-900 flex-1 uppercase">Lucro Real</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right font-bold">R$ {r.lucroFinalSem.toFixed(2)}</Text><Text style={{ fontSize: rf(12) }} className="text-purple-900 w-20 text-right font-black">R$ {r.lucroFinalCom.toFixed(2)}</Text></View>
-                <View className="flex-row justify-between p-4 bg-gray-50"><Text style={{ fontSize: rf(10) }} className="font-bold text-gray-400 flex-1 uppercase">Ponto de Equilíbrio</Text><Text style={{ fontSize: rf(12) }} className="w-20 text-right text-gray-400">{Math.ceil(r.PE_Sem)} un</Text><Text style={{ color: roxo, fontSize: rf(12) }} className="w-20 text-right font-black">{Math.ceil(r.PE_Com)} un</Text></View>
+
+                {/* 1. Preço de venda (PV) */}
+                <View className="flex-row justify-between p-4 border-b border-gray-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Preço de venda (PV)</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">R$ {r.PV_sem.toFixed(2)}</Text>
+                  <Text style={{ color: roxo, fontSize: rf(11) }} className="w-24 text-right font-black">R$ {r.PVM.toFixed(2)}</Text>
+                </View>
+
+                {/* 2. Custo variável (CV) */}
+                <View className="flex-row justify-between p-4 border-b border-gray-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Custo variável (CV)</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">R$ {r.CVR.toFixed(2)}</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">R$ {r.CVR.toFixed(2)}</Text>
+                </View>
+
+                {/* 3. Margem bruta (PV-CV) */}
+                <View className="flex-row justify-between p-4 border-b border-gray-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Margem bruta (PV-CV)</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">R$ {r.margemBrutaSem.toFixed(2)}</Text>
+                  <Text style={{ color: roxo, fontSize: rf(11) }} className="w-24 text-right font-black">R$ {r.margemBrutaCom.toFixed(2)}</Text>
+                </View>
+
+                {/* 4. Margem bruta (%) */}
+                <View className="flex-row justify-between p-4 border-b border-gray-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Margem bruta (%)</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">{r.margemBrutaPercSem.toFixed(0)}%</Text>
+                  <Text style={{ color: roxo, fontSize: rf(11) }} className="w-24 text-right font-black">{r.margemBrutaPercCom.toFixed(0)}%</Text>
+                </View>
+
+                {/* 5. Custos + Despesas (CF + DF + DV) */}
+                <View className="flex-row justify-between p-4 border-b border-gray-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-500 flex-1 uppercase">Custos + Despesas (CF+DF+DV)</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">R$ {r.somaCF_DF_DV.toFixed(2)}</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-700 font-medium">R$ {r.somaCF_DF_DV.toFixed(2)}</Text>
+                </View>
+
+                {/* 6. Lucro líquido unitário ou Prejuízo (Mantido destaque estético roxo) */}
+                <View className="flex-row justify-between p-4 border-b border-gray-50 bg-purple-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-black text-purple-900 flex-1 uppercase">Lucro líquido / Prejuízo</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right font-bold text-purple-900">R$ {r.lucroFinalSem.toFixed(2)}</Text>
+                  <Text style={{ fontSize: rf(11) }} className="text-purple-900 w-24 text-right font-black">R$ {r.lucroFinalCom.toFixed(2)}</Text>
+                </View>
+
+                {/* 7. Ponto de equilíbrio (unidade/mês) (Mantido destaque estético cinza) */}
+                <View className="flex-row justify-between p-4 bg-gray-50 items-center">
+                  <Text style={{ fontSize: rf(10) }} className="font-bold text-gray-400 flex-1 uppercase">Ponto de equilíbrio (un/mês)</Text>
+                  <Text style={{ fontSize: rf(11) }} className="w-24 text-right text-gray-400 font-bold">{Math.ceil(r.PE_Sem)} un</Text>
+                  <Text style={{ color: roxo, fontSize: rf(11) }} className="w-24 text-right font-black">{Math.ceil(r.PE_Com)} un</Text>
+                </View>
               </View>
             )}
           </View>
