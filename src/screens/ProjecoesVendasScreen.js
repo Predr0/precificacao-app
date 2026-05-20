@@ -21,13 +21,15 @@ export default function ProjecaoVendasScreen() {
   const roxo = '#4d235e';
   const lavanda = '#9e86bd';
 
-  const calcularProjecao = (p) => {
+const calcularProjecao = (p) => {
     if (!p) return null;
     const unidades = parseFloat(unidadesProjetadas) || 0;
     const config = p.config;
     const insumos = p.insumos;
     const listaColaboradores = p.listaColaboradores;
     const listaCustosFixos = p.listaCustosFixos;
+    const listaDespesasFixas = p.listaDespesasFixas || [];
+    const listaDespesasVariaveis = p.listaDespesasVariaveis || [];
 
     const dias = parseFloat(config.dias) || 1;
     const horas = parseFloat(config.horas) || 1;
@@ -39,12 +41,24 @@ export default function ProjecaoVendasScreen() {
       listaColaboradores.reduce((acc, c) => acc + (parseFloat(c.salario) || 0), 0) +
       listaCustosFixos.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
 
-    const CVR = insumos.reduce((acc, curr) => acc + (parseFloat(curr.custoFração) || 0), 0);
-    const CFR = (totalCF_Mensal / minMes) * tempoProd;
-    
-    const totalGeral = CFR + CVR; 
+    const totalDF_Mensal = listaDespesasFixas.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
+    const totalDV_Mensal = listaDespesasVariaveis.reduce((acc, i) => acc + (parseFloat(i.valor) || 0), 0);
 
-    const divisorMarkup = 100 - (lucroDesejado + 5); 
+    const fatorRateio = tempoProd / minMes;
+
+    const CVR = insumos.reduce((acc, curr) => acc + (parseFloat(curr.custoFração) || 0), 0);
+    const CFR = totalCF_Mensal * fatorRateio;
+    const DFR = totalDF_Mensal * fatorRateio;
+    const DVR = totalDV_Mensal * fatorRateio;
+    
+    // Agora inclui todas as variáveis de custo e despesa
+    const totalGeral = CFR + CVR + DFR + DVR; 
+
+    const pDF = totalGeral > 0 ? (DFR / totalGeral) * 100 : 0;
+    const pDV = totalGeral > 0 ? (DVR / totalGeral) * 100 : 0;
+
+    // Markup calculado dinamicamente igual aos relatórios
+    const divisorMarkup = 100 - (pDF + pDV + lucroDesejado);
     const markupIndice = divisorMarkup > 0 ? 100 / divisorMarkup : 1.0;
 
     const PV_sem = totalGeral + (totalGeral * (lucroDesejado / 100));
