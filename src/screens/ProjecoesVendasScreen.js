@@ -163,9 +163,6 @@ export default function ProjecaoVendasScreen() {
             
             <View style={{ backgroundColor: roxo }} className="p-8 rounded-[45px] shadow-xl items-center mb-6">
               <MaterialCommunityIcons name="lightbulb-on-outline" size={rf(24)} color="#FFF" />
-              <Text style={{ fontSize: rf(12) }} className="text-white font-black uppercase mt-4 mb-2 tracking-widest text-center">
-                Insights de Rentabilidade
-              </Text>
               <Text style={{ fontSize: rf(11) }} className="text-white/80 text-center leading-tight font-medium">
                 Ao vender {res.unidades} unidades utilizando a variação entre o preço de venda e o preço com mark-up você garante um lucro de
                 <Text className="text-white font-black"> R$ {res.variacaoTotalBruta.toFixed(2)} </Text> 
