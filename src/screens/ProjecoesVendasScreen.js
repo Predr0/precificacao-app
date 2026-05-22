@@ -21,7 +21,7 @@ export default function ProjecaoVendasScreen() {
   const roxo = '#4d235e';
   const lavanda = '#9e86bd';
 
-const calcularProjecao = (p) => {
+  const calcularProjecao = (p) => {
     if (!p) return null;
     const unidades = parseFloat(unidadesProjetadas) || 0;
     const config = p.config;
@@ -32,9 +32,9 @@ const calcularProjecao = (p) => {
     const listaDespesasVariaveis = p.listaDespesasVariaveis || [];
 
     const dias = parseFloat(config.dias) || 1;
-    const horas = parseFloat(config.horas) || 1;
+    const hours = parseFloat(config.horas) || 1;
     const tempoProd = parseFloat(config.tempoProducao) || 1;
-    const minMes = dias * horas * 60;
+    const minMes = dias * hours * 60;
     const lucroDesejado = parseFloat(config.lucroDesejado) || 0;
 
     const totalCF_Mensal = (parseFloat(config.salario) || 0) + 
@@ -51,13 +51,11 @@ const calcularProjecao = (p) => {
     const DFR = totalDF_Mensal * fatorRateio;
     const DVR = totalDV_Mensal * fatorRateio;
     
-    // Agora inclui todas as variáveis de custo e despesa
     const totalGeral = CFR + CVR + DFR + DVR; 
 
     const pDF = totalGeral > 0 ? (DFR / totalGeral) * 100 : 0;
     const pDV = totalGeral > 0 ? (DVR / totalGeral) * 100 : 0;
 
-    // Markup calculado dinamicamente igual aos relatórios
     const divisorMarkup = 100 - (pDF + pDV + lucroDesejado);
     const markupIndice = divisorMarkup > 0 ? 100 / divisorMarkup : 1.0;
 
@@ -113,7 +111,6 @@ const calcularProjecao = (p) => {
                 style={{ backgroundColor: roxo }} 
                 className="p-8 rounded-[40px] items-center shadow-xl mb-4 flex-row justify-between"
               >
-                {/* FALLBACK DO NOME NA LISTA DE SELEÇÃO */}
                 <Text style={{ fontSize: rf(16) }} className="text-white font-black uppercase text-center">
                   {item.nome?.trim() ? item.nome : "Produto sem nome"}
                 </Text>
@@ -145,7 +142,6 @@ const calcularProjecao = (p) => {
               <View className="bg-white border border-gray-100 rounded-b-[30px] shadow-sm overflow-hidden">
                 <View className="flex-row items-center p-4 border-b border-gray-50">
                   <View className="flex-1">
-                    {/* FALLBACK DO NOME DENTRO DA TABELA DE RESULTADOS */}
                     <Text style={{ color: roxo, fontSize: rf(12) }} className="font-black uppercase">
                       {produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome"}
                     </Text>
@@ -171,16 +167,22 @@ const calcularProjecao = (p) => {
                 Insights de Rentabilidade
               </Text>
               <Text style={{ fontSize: rf(11) }} className="text-white/80 text-center leading-tight font-medium">
-                Ao vender {res.unidades} unidades utilizando o Mark-up, você garante um faturamento extra de 
+                Ao vender {res.unidades} unidades utilizando a variação entre o preço de venda e o preço com mark-up você garante um lucro de
                 <Text className="text-white font-black"> R$ {res.variacaoTotalBruta.toFixed(2)} </Text> 
-                em comparação à margem simples.
               </Text>
             </View>
 
             <View className="bg-purple-50 p-6 rounded-[30px] border border-purple-100">
-              <Text style={{ color: roxo, fontSize: rf(10) }} className="text-center font-bold leading-tight italic uppercase">
-                Faturamento Total Previsto:{"\n"}
-                <Text style={{ fontSize: rf(18) }} className="font-black">R$ {res.faturamentoTotal.toFixed(2)}</Text>
+              <Text style={{ color: roxo, fontSize: rf(10) }} className="text-center font-black uppercase mb-3 tracking-wider">
+                Faturamento Total Previsto
+              </Text>
+              
+              <Text style={{ color: '#4b5563', fontSize: rf(12) }} className="text-center font-bold mb-1">
+                Preço de Venda: <Text style={{ color: roxo }} className="font-black">R$ {(res.PV_sem * res.unidades).toFixed(2)}</Text>
+              </Text>
+              
+              <Text style={{ color: '#4b5563', fontSize: rf(12) }} className="text-center font-bold">
+                Preço com mark-up: <Text style={{ color: roxo }} className="font-black">R$ {res.faturamentoTotal.toFixed(2)}</Text>
               </Text>
             </View>
           </View>
