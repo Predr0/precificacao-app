@@ -4,8 +4,7 @@ import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-// NOVO IMPORT: Para gerenciar o armazenamento interno e permanente do aplicativo
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 412;
@@ -20,7 +19,6 @@ export default function RelatoriosScreen() {
   
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [abaAtiva, setAbaAtiva] = useState('geral');
-  // TRAVA DE SEGURANÇA: Evita cliques múltiplos simultâneos
   const [gerandoPdf, setGerandoPdf] = useState(false);
   const { height } = useWindowDimensions();
 
@@ -89,7 +87,7 @@ export default function RelatoriosScreen() {
   const r = calcular(produtoSelecionado);
 
   const executarGeracaoPDF = async () => {
-    if (gerandoPdf) return; // Bloqueia se já houver uma execução em andamento
+    if (gerandoPdf) return; 
     setGerandoPdf(true);
 
     const nomeProd = produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome";
@@ -126,10 +124,11 @@ export default function RelatoriosScreen() {
       </tr>
     `).join('');
 
-    const htmlTemplate = `
+    const htmlTemplate = `<!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
             body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; padding: 30px; }
             .header { border-bottom: 4px solid #4d235e; padding-bottom: 15px; margin-bottom: 30px; }
@@ -218,20 +217,16 @@ export default function RelatoriosScreen() {
     `;
 
     try {
-      // 1. Gera o PDF inicial no cache
       const { uri } = await Print.printToFileAsync({ html: htmlTemplate });
       
-      // 2. Define o caminho permanente dentro do diretório do aplicativo (Apagado no Uninstall)
       const nomeSanitizado = nomeProd.replace(/\s+/g, '_');
       const uriPermanente = `${FileSystem.documentDirectory}Relatorio_${nomeSanitizado}.pdf`;
 
-      // 3. Move do cache para a pasta segura do aplicativo
       await FileSystem.moveAsync({
         from: uri,
         to: uriPermanente
       });
 
-      // 4. Menu para conferir na hora ou despachar por rede social
       Alert.alert(
         "PDF Armazenado!",
         "O arquivo foi salvo em segurança nos arquivos do aplicativo.",
@@ -244,7 +239,7 @@ export default function RelatoriosScreen() {
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
     } finally {
-      setGerandoPdf(false); // Libera o botão novamente
+      setGerandoPdf(false); 
     }
   };
 
@@ -257,7 +252,7 @@ export default function RelatoriosScreen() {
       `Deseja gerar o pdf do relatório do seu Produto "${nomeProd}"?`,
       [
         { text: "Não", style: "cancel" },
-        { text: "Sim, Gerar", onPress: executarGeracaoPDF }
+        { text: "Sim, Gerar", onPress: Peanut => executarGeracaoPDF() } // Tratamento limpo sem passagem de evento implicito
       ]
     );
   };
@@ -321,7 +316,6 @@ export default function RelatoriosScreen() {
           </View>
           {produtoSelecionado && (
             <View className="flex-row items-center">
-              {/* O ícone muda para um indicador de carregamento caso o PDF esteja processando */}
               <TouchableOpacity onPress={geradorPDFComFiltro} style={{ marginRight: rf(16) }} disabled={gerandoPdf}>
                 {gerandoPdf ? (
                   <ActivityIndicator size="small" color={roxo} />
@@ -350,7 +344,6 @@ export default function RelatoriosScreen() {
           </View>
         ) : (
           <View>
-            {/* SELETOR DE ABAS */}
             <View className="flex-row bg-gray-200 p-1 rounded-2xl mb-8">
               {['geral', 'formacao', 'margem'].map((item) => (
                 <TouchableOpacity key={item} onPress={() => setAbaAtiva(item)} className={`flex-1 py-3 rounded-xl ${abaAtiva === item ? 'bg-white shadow-sm' : ''}`}>
@@ -376,7 +369,7 @@ export default function RelatoriosScreen() {
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
-                <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total Material Unidade" col={roxo} mostrarRateio={true} isCV={true} />
+                <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total Material Unidade" cor={roxo} mostrarRateio={true} isCV={true} />
                 <TabelaDinamica titulo="Despesas Fixas" dados={produtoSelecionado.listaDespesasFixas} valorTotal={r.DFR} labelTotal="Total DF Rateado" cor={roxo} mostrarRateio={true} fator={r.fatorRateio} />
                 <TabelaDinamica titulo="Despesas Variáveis" dados={produtoSelecionado.listaDespesasVariaveis} valorTotal={r.DVR} labelTotal="Total DV Rateado" cor={roxo} mostrarRateio={true} fator={r.fatorRateio} />
                 
