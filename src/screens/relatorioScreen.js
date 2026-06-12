@@ -1,9 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, useWindowDimensions, Dimensions, PixelRatio } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, useWindowDimensions, Dimensions, PixelRatio, Alert, ActivityIndicator } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+// NOVO IMPORT: Para gerenciar o armazenamento interno e permanente do aplicativo
+import * as FileSystem from 'expo-file-system';
 
-// Lógica de Escalonamento baseada no seu Pixel 7 (largura 412)
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 412;
 
@@ -17,6 +20,8 @@ export default function RelatoriosScreen() {
   
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [abaAtiva, setAbaAtiva] = useState('geral');
+  // TRAVA DE SEGURANÇA: Evita cliques múltiplos simultâneos
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   const { height } = useWindowDimensions();
 
   const roxo = '#4d235e';
@@ -83,6 +88,180 @@ export default function RelatoriosScreen() {
 
   const r = calcular(produtoSelecionado);
 
+  const executarGeracaoPDF = async () => {
+    if (gerandoPdf) return; // Bloqueia se já houver uma execução em andamento
+    setGerandoPdf(true);
+
+    const nomeProd = produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome";
+
+    const htmlCustosFixos = [
+      { nome: "Pró-labore (Dono)", valor: parseFloat(produtoSelecionado.config.salario) || 0 },
+      ...produtoSelecionado.listaColaboradores.map(c => ({ nome: c.nome, valor: parseFloat(c.salario) || 0 })),
+      ...produtoSelecionado.listaCustosFixos.map(i => ({ nome: i.nome, valor: parseFloat(i.valor) || 0 }))
+    ].map(item => `
+      <tr>
+        <td>${item.nome || 'Item'}</td>
+        <td style="text-align: right;">R$ ${item.valor.toFixed(2)} (R$ ${(item.valor * r.fatorRateio).toFixed(2)})</td>
+      </tr>
+    `).join('');
+
+    const htmlMateriais = produtoSelecionado.insumos.map(item => `
+      <tr>
+        <td>${item.nome || 'Item'}</td>
+        <td style="text-align: right;">R$ ${(parseFloat(item.precoEmbalagem) || 0).toFixed(2)} (R$ ${(parseFloat(item.custoFração) || 0).toFixed(2)})</td>
+      </tr>
+    `).join('');
+
+    const htmlDespesasFixas = produtoSelecionado.listaDespesasFixas.map(item => `
+      <tr>
+        <td>${item.nome || 'Item'}</td>
+        <td style="text-align: right;">R$ ${(parseFloat(item.valor) || 0).toFixed(2)} (R$ ${(parseFloat(item.valor) * r.fatorRateio).toFixed(2)})</td>
+      </tr>
+    `).join('');
+
+    const htmlDespesasVariaveis = produtoSelecionado.listaDespesasVariaveis.map(item => `
+      <tr>
+        <td>${item.nome || 'Item'}</td>
+        <td style="text-align: right;">R$ ${(parseFloat(item.valor) || 0).toFixed(2)} (R$ ${(parseFloat(item.valor) * r.fatorRateio).toFixed(2)})</td>
+      </tr>
+    `).join('');
+
+    const htmlTemplate = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; padding: 30px; }
+            .header { border-bottom: 4px solid #4d235e; padding-bottom: 15px; margin-bottom: 30px; }
+            .header h1 { color: #4d235e; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: -1px; }
+            .header p { margin: 5px 0 0 0; color: #9e86bd; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+            .sub-header { font-size: 16px; font-weight: bold; color: #4d235e; margin-bottom: 20px; text-transform: uppercase; }
+            .table-title { background-color: #4d235e; color: white; padding: 8px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; border-radius: 6px 6px 0 0; margin-top: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+            th { background-color: #f9fafb; color: #9ca3af; font-weight: bold; text-transform: uppercase; font-size: 9px; }
+            .footer-row { background-color: #f9fafb; font-weight: bold; color: #4d235e; }
+            .highlight-box { background-color: #4d235e; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-top: 30px; }
+            .highlight-box h2 { margin: 0; font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+            .highlight-box p { margin: 8px 0 0 0; font-size: 36px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Relatório Estratégico</h1>
+            <p>Análise de Precificação e Rentabilidade</p>
+          </div>
+          
+          <div class="sub-header">Produto: ${nomeProd}</div>
+
+          <div class="table-title">Custos Fixos (Mês vs Rateio)</div>
+          <table>
+            ${htmlCustosFixos}
+            <tr class="footer-row"><td>Total CF Unitário</td><td style="text-align: right;">R$ ${r.CFR.toFixed(2)}</td></tr>
+          </table>
+
+          <div class="table-title">Materiais (Insumos)</div>
+          <table>
+            ${htmlMateriais}
+            <tr class="footer-row"><td>Total Material Unidade</td><td style="text-align: right;">R$ ${r.CVR.toFixed(2)}</td></tr>
+          </table>
+
+          <div class="table-title">Despesas Fixas</div>
+          <table>
+            ${htmlDespesasFixas}
+            <tr class="footer-row"><td>Total DF Rateado</td><td style="text-align: right;">R$ ${r.DFR.toFixed(2)}</td></tr>
+          </table>
+
+          <div class="table-title">Despesas Variáveis</div>
+          <table>
+            ${htmlDespesasVariaveis}
+            <tr class="footer-row"><td>Total DV Rateado</td><td style="text-align: right;">R$ ${r.DVR.toFixed(2)}</td></tr>
+          </table>
+
+          <div class="table-title">Formação do Preço de Venda</div>
+          <table>
+            <thead>
+              <tr><th>Descrição</th><th style="text-align: right;">Valor (R$)</th><th style="text-align: right;">%</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Custos Variáveis</td><td style="text-align: right;">R$ ${r.CVR.toFixed(2)}</td><td style="text-align: right;">${r.pCV.toFixed(2)}%</td></tr>
+              <tr><td>Custos fixos</td><td style="text-align: right;">R$ ${r.CFR.toFixed(2)}</td><td style="text-align: right;">${r.pCF.toFixed(2)}%</td></tr>
+              <tr><td>Despesas fixas</td><td style="text-align: right;">R$ ${r.DFR.toFixed(2)}</td><td style="text-align: right;">${r.pDF.toFixed(2)}%</td></tr>
+              <tr><td>Despesas variáveis</td><td style="text-align: right;">R$ ${r.DVR.toFixed(2)}</td><td style="text-align: right;">${r.pDV.toFixed(2)}%</td></tr>
+              <tr><td>Margem de lucro desejada</td><td style="text-align: right;">R$ ${(r.totalGeral * (r.lucroDesejado/100)).toFixed(2)}</td><td style="text-align: right;">${r.lucroDesejado.toFixed(2)}%</td></tr>
+              <tr class="footer-row" style="background-color: #f3f4f6;"><td>PREÇO DE VENDA</td><td style="text-align: right;">R$ ${r.PV_sem.toFixed(2)}</td><td style="text-align: right;">${(100 + r.lucroDesejado).toFixed(2)}%</td></tr>
+            </tbody>
+          </table>
+
+          <div class="table-title">Análise de Rentabilidade</div>
+          <table>
+            <thead>
+              <tr><th>Indicador</th><th style="text-align: right;">Simples</th><th style="text-align: right;">Mark-up</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Preço de venda (PV)</td><td style="text-align: right;">R$ ${r.PV_sem.toFixed(2)}</td><td style="text-align: right; color: #4d235e; font-weight: bold;">R$ ${r.PVM.toFixed(2)}</td></tr>
+              <tr><td>Custo variável (CV)</td><td style="text-align: right;">R$ ${r.CVR.toFixed(2)}</td><td style="text-align: right;">R$ ${r.CVR.toFixed(2)}</td></tr>
+              <tr><td>Margem bruta (PV-CV)</td><td style="text-align: right;">R$ ${r.margemBrutaSem.toFixed(2)}</td><td style="text-align: right; color: #4d235e; font-weight: bold;">R$ ${r.margemBrutaCom.toFixed(2)}</td></tr>
+              <tr><td>Margem bruta (%)</td><td style="text-align: right;">${r.margemBrutaPercSem.toFixed(0)}%</td><td style="text-align: right; color: #4d235e; font-weight: bold;">${r.margemBrutaPercCom.toFixed(0)}%</td></tr>
+              <tr><td>Custos + Despesas (CF+DF+DV)</td><td style="text-align: right;">R$ ${r.somaCF_DF_DV.toFixed(2)}</td><td style="text-align: right;">R$ ${r.somaCF_DF_DV.toFixed(2)}</td></tr>
+              <tr style="background-color: #faf5ff; font-weight: bold;"><td>Lucro líquido / Prejuízo</td><td style="text-align: right;">R$ ${r.lucroFinalSem.toFixed(2)}</td><td style="text-align: right; color: #4d235e;">R$ ${r.lucroFinalCom.toFixed(2)}</td></tr>
+              <tr style="background-color: #f9fafb; color: #9ca3af;"><td>Ponto de equilíbrio (un/mês)</td><td style="text-align: right;">${Math.ceil(r.PE_Sem)} un</td><td style="text-align: right; color: #4d235e;">${Math.ceil(r.PE_Com)} un</td></tr>
+            </tbody>
+          </table>
+
+          <div class="highlight-box">
+            <h2>Preço com Sugestão de Mark-up</h2>
+            <p>R$ ${r.PVM.toFixed(2)}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    try {
+      // 1. Gera o PDF inicial no cache
+      const { uri } = await Print.printToFileAsync({ html: htmlTemplate });
+      
+      // 2. Define o caminho permanente dentro do diretório do aplicativo (Apagado no Uninstall)
+      const nomeSanitizado = nomeProd.replace(/\s+/g, '_');
+      const uriPermanente = `${FileSystem.documentDirectory}Relatorio_${nomeSanitizado}.pdf`;
+
+      // 3. Move do cache para a pasta segura do aplicativo
+      await FileSystem.moveAsync({
+        from: uri,
+        to: uriPermanente
+      });
+
+      // 4. Menu para conferir na hora ou despachar por rede social
+      Alert.alert(
+        "PDF Armazenado!",
+        "O arquivo foi salvo em segurança nos arquivos do aplicativo.",
+        [
+          { text: "Visualizar / Abrir", onPress: () => Print.printAsync({ uri: uriPermanente }) },
+          { text: "Compartilhar", onPress: () => Sharing.shareAsync(uriPermanente) },
+          { text: "Fechar", style: "cancel" }
+        ]
+      );
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+    } finally {
+      setGerandoPdf(false); // Libera o botão novamente
+    }
+  };
+
+  const geradorPDFComFiltro = () => {
+    if (!produtoSelecionado || gerandoPdf) return;
+    const nomeProd = produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome";
+
+    Alert.alert(
+      "Gerar Relatório",
+      `Deseja gerar o pdf do relatório do seu Produto "${nomeProd}"?`,
+      [
+        { text: "Não", style: "cancel" },
+        { text: "Sim, Gerar", onPress: executarGeracaoPDF }
+      ]
+    );
+  };
+
   const TabelaDinamica = ({ titulo, dados, valorTotal, labelTotal, cor, mostrarRateio = false, fator = 0, isCV = false }) => (
     <View className="mb-6 border border-gray-100 rounded-[30px] overflow-hidden bg-white shadow-sm">
       <View style={{ backgroundColor: cor }} className="p-4">
@@ -132,7 +311,7 @@ export default function RelatoriosScreen() {
       <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: height * 0.05, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
         
         <View className="mb-8 flex-row justify-between items-end">
-          <View>
+          <View className="flex-1">
             <Text style={{ color: roxo, fontSize: rf(30) }} className="text-3xl font-black uppercase tracking-tighter">Relatórios</Text>
             {produtoSelecionado && (
               <Text style={{ color: roxo, fontSize: rf(10) }} className="font-bold uppercase mt-1">
@@ -141,9 +320,19 @@ export default function RelatoriosScreen() {
             )}
           </View>
           {produtoSelecionado && (
-            <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
-              <MaterialCommunityIcons name="swap-horizontal" size={rf(32)} color={roxo} />
-            </TouchableOpacity>
+            <View className="flex-row items-center">
+              {/* O ícone muda para um indicador de carregamento caso o PDF esteja processando */}
+              <TouchableOpacity onPress={geradorPDFComFiltro} style={{ marginRight: rf(16) }} disabled={gerandoPdf}>
+                {gerandoPdf ? (
+                  <ActivityIndicator size="small" color={roxo} />
+                ) : (
+                  <MaterialCommunityIcons name="file-pdf-box" size={rf(32)} color={roxo} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
+                <MaterialCommunityIcons name="swap-horizontal" size={rf(32)} color={roxo} />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
@@ -187,7 +376,7 @@ export default function RelatoriosScreen() {
                   mostrarRateio={true}
                   fator={r.fatorRateio}
                 />
-                <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total Material Unidade" cor={roxo} mostrarRateio={true} isCV={true} />
+                <TabelaDinamica titulo="Materiais (Insumos)" dados={produtoSelecionado.insumos} valorTotal={r.CVR} labelTotal="Total Material Unidade" col={roxo} mostrarRateio={true} isCV={true} />
                 <TabelaDinamica titulo="Despesas Fixas" dados={produtoSelecionado.listaDespesasFixas} valorTotal={r.DFR} labelTotal="Total DF Rateado" cor={roxo} mostrarRateio={true} fator={r.fatorRateio} />
                 <TabelaDinamica titulo="Despesas Variáveis" dados={produtoSelecionado.listaDespesasVariaveis} valorTotal={r.DVR} labelTotal="Total DV Rateado" cor={roxo} mostrarRateio={true} fator={r.fatorRateio} />
                 
@@ -208,7 +397,6 @@ export default function RelatoriosScreen() {
               </View>
             )}
 
-            {/* ABA ALTERADA: REORDENAÇÃO, PLURAIS E NOVA POSIÇÃO DO PREÇO DE VENDA */}
             {abaAtiva === 'formacao' && (
               <View className="mb-6 border border-gray-100 rounded-[40px] overflow-hidden bg-white shadow-xl">
                 <View style={{ backgroundColor: '#f3f4f6' }} className="p-5 flex-row justify-between">
