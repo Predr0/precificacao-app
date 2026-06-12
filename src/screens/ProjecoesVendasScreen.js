@@ -1,7 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, ScrollView, SafeAreaView, TouchableOpacity, useWindowDimensions, Dimensions, PixelRatio } from 'react-native';
+import { View, Text, TextInput, ScrollView, SafeAreaView, TouchableOpacity, useWindowDimensions, Dimensions, PixelRatio, Alert, ActivityIndicator } from 'react-native';
 import { AppContext } from '../context/AppContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 412;
@@ -17,6 +20,7 @@ export default function ProjecaoVendasScreen() {
   
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [unidadesProjetadas, setUnidadesProjetadas] = useState('100');
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   
   const roxo = '#4d235e';
   const lavanda = '#9e86bd';
@@ -72,6 +76,122 @@ export default function ProjecaoVendasScreen() {
 
   const res = calcularProjecao(produtoSelecionado);
 
+  const executarGeracaoPDF = async () => {
+    if (gerandoPdf) return;
+    setGerandoPdf(true);
+
+    const nomeProd = produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome";
+
+    const htmlTemplate = `<!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; padding: 30px; }
+            .header { border-bottom: 4px solid #4d235e; padding-bottom: 15px; margin-bottom: 30px; }
+            .header h1 { color: #4d235e; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: -1px; }
+            .header p { margin: 5px 0 0 0; color: #9e86bd; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+            .sub-header { font-size: 16px; font-weight: bold; color: #4d235e; margin-bottom: 20px; text-transform: uppercase; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; margin-top: 10px; }
+            th, td { padding: 12px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+            th { background-color: #f3f4f6; color: #9ca3af; font-weight: bold; text-transform: uppercase; font-size: 10px; }
+            .insight-box { background-color: #4d235e; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
+            .insight-box h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+            .insight-box p { margin: 8px 0 0 0; font-size: 14px; opacity: 0.85; line-height: 1.4; }
+            .faturamento-box { background-color: #faf5ff; border: 1px solid #e9d5ff; padding: 20px; border-radius: 12px; text-align: center; }
+            .faturamento-box h3 { margin: 0 0 12px 0; color: #4d235e; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+            .faturamento-box p { margin: 6px 0; font-size: 14px; font-weight: bold; color: #4b5563; }
+            .faturamento-box span { color: #4d235e; font-weight: 900; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Projeções de Vendas</h1>
+            <p>Simulação de Escala e Faturamento</p>
+          </div>
+          
+          <div class="sub-header">Produto: ${nomeProd}</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left;">Produto</th>
+                <th style="text-align: right;">Precificação</th>
+                <th style="text-align: right;">Ganho</th>
+                <th style="text-align: right;">Variação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong style="color: #4d235e; text-transform: uppercase;">${nomeProd}</strong><br/>
+                  <small style="color: #9ca3af;">Simulado: ${res.unidades} un.</small>
+                </td>
+                <td style="text-align: right;">
+                  Simples: R$ ${res.PV_sem.toFixed(2)}<br/>
+                  <strong>Markup: R$ ${res.PVM.toFixed(2)}</strong>
+                </td>
+                <td style="text-align: right; color: #16a34a; font-weight: bold;">${res.ganhoPercentual.toFixed(2)}%</td>
+                <td style="text-align: right; color: #4d235e; font-weight: bold;">R$ ${res.variacaoTotalBruta.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="insight-box">
+            <h2>Insights de Rentabilidade</h2>
+            <p>Ao vender ${res.unidades} unidades utilizando a variação entre o preço de venda e o preço com mark-up você garante um lucro de <strong>R$ ${res.variacaoTotalBruta.toFixed(2)}</strong></p>
+          </div>
+
+          <div class="faturamento-box">
+            <h3>Faturamento Total Previsto</h3>
+            <p>Preço de Venda: <span>R$ ${(res.PV_sem * res.unidades).toFixed(2)}</span></p>
+            <p>Preço com mark-up: <span>R$ ${res.faturamentoTotal.toFixed(2)}</span></p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    try {
+      const { uri } = await Print.printToFileAsync({ html: htmlTemplate });
+      const nomeSanitizado = nomeProd.replace(/\s+/g, '_');
+      const uriPermanente = `${FileSystem.documentDirectory}Projecao_${nomeSanitizado}.pdf`;
+
+      await FileSystem.moveAsync({
+        from: uri,
+        to: uriPermanente
+      });
+
+      Alert.alert(
+        "Projeção Salva!",
+        "O arquivo de simulação foi armazenado com sucesso no aplicativo.",
+        [
+          { text: "Visualizar / Abrir", onPress: () => Print.printAsync({ uri: uriPermanente }) },
+          { text: "Compartilhar", onPress: () => Sharing.shareAsync(uriPermanente) },
+          { text: "Fechar", style: "cancel" }
+        ]
+      );
+    } catch (error) {
+      console.error("Erro ao gerar PDF de Projeção:", error);
+    } finally { // CORRIGIDO AQUI: De 'file' para 'finally'
+      setGerandoPdf(false);
+    }
+  };
+
+  const geradorPDFComFiltro = () => {
+    if (!produtoSelecionado || gerandoPdf) return;
+    const nomeProd = produtoSelecionado.nome?.trim() ? produtoSelecionado.nome : "Produto sem nome";
+
+    Alert.alert(
+      "Exportar Projeção",
+      `Deseja gerar o pdf das projeções do seu Produto "${nomeProd}"?`,
+      [
+        { text: "Não", style: "cancel" },
+        { text: "Sim, Gerar", onPress: () => executarGeracaoPDF() }
+      ]
+    );
+  };
+
   const HeaderTabela = ({ labels }) => (
     <View className="flex-row px-4 py-3 bg-gray-100 rounded-t-[20px] mb-1">
       {labels.map((l, i) => (
@@ -90,14 +210,23 @@ export default function ProjecaoVendasScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="mb-8 flex-row justify-between items-end">
-          <View>
+          <View className="flex-1">
             <Text style={{ color: roxo, fontSize: rf(30) }} className="font-black uppercase tracking-tighter">Projeções</Text>
             <Text style={{ fontSize: rf(10) }} className="text-gray-400 font-bold uppercase">Simulação de Escala</Text>
           </View>
           {produtoSelecionado && (
-            <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
-               <MaterialCommunityIcons name="swap-horizontal" size={rf(32)} color={roxo} />
-            </TouchableOpacity>
+            <View className="flex-row items-center">
+              <TouchableOpacity onPress={geradorPDFComFiltro} style={{ marginRight: rf(16) }} disabled={gerandoPdf}>
+                {gerandoPdf ? (
+                  <ActivityIndicator size="small" color={roxo} />
+                ) : (
+                  <MaterialCommunityIcons name="file-pdf-box" size={rf(32)} color={roxo} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setProdutoSelecionado(null)}>
+                 <MaterialCommunityIcons name="swap-horizontal" size={rf(32)} color={roxo} />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
