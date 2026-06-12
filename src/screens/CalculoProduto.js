@@ -117,23 +117,8 @@ export default function CalculoProduto({ navigation }) {
             Venda <Text className="font-bold text-red-600">{Math.ceil(res.PE)}</Text> unidades/mês para não ter prejuízo.
           </Text>
         </View>
-
-        <TouchableOpacity 
-          onPress={() => navigation.navigate('HomeScreen')}
-          style={{ backgroundColor: roxoProfundo }}
-          className="p-6 rounded-[35px] mb-8 shadow-xl flex-row justify-center items-center"
-        >
-          <MaterialCommunityIcons name="home-outline" size={24} color="white" />
-          <Text 
-            style={{ fontSize: rf(18) }}
-            className="text-white font-black ml-3 uppercase"
-          >
-            Ir para o Início
-          </Text>
-        </TouchableOpacity>
-
-        {/* COMPOSIÇÃO DO PREÇO (%) */}
-        <View className="bg-gray-100 p-6 rounded-[35px] mb-12">
+        
+        <View className="bg-gray-100 p-6 rounded-[35px] mb-6">
           <Text 
             style={{ fontSize: rf(12) }}
             className="text-gray-500 uppercase font-bold mb-4 tracking-widest text-center"
@@ -153,6 +138,21 @@ export default function CalculoProduto({ navigation }) {
             </View>
           ))}
         </View>
+
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('HomeScreen')}
+          style={{ backgroundColor: roxoProfundo }}
+          className="p-6 rounded-[35px] mb-12 shadow-xl flex-row justify-center items-center"
+        >
+          <MaterialCommunityIcons name="home-outline" size={24} color="white" />
+          <Text 
+            style={{ fontSize: rf(18) }}
+            className="text-white font-black ml-3 uppercase"
+          >
+            Ir para o Início
+          </Text>
+        </TouchableOpacity>
+        
       </ScrollView>
     </SafeAreaView>
   );
