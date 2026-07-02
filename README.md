@@ -11,7 +11,7 @@ O app elimina planilhas complexas, traduzindo conceitos de margem de lucro, cust
 
 ---
 
-## ✨ Funcionalidades Principais
+##  Funcionalidades Principais
 
 - **📦 Gestão de Insumos/Matéria-Prima:** Cadastro dinâmico de insumos com conversão automática de medidas (ex: kg para gramas, litros para ml) para cálculo do custo unitário real.
 - **🛠️ Precificação de Produtos/Serviços:** Composição do preço final baseada em custos fixos rateados, custos variáveis, tempo de mão de obra investido e margem de lucro desejada.
@@ -20,7 +20,7 @@ O app elimina planilhas complexas, traduzindo conceitos de margem de lucro, cust
 
 ---
 
-## 🛠️ Stack Técnica e Arquitetura
+##  Stack Técnica e Arquitetura
 
 O projeto foi estruturado seguindo rigorosamente as melhores práticas do ecossistema JavaScript/TypeScript moderno, focando em separação de conceitos (*Separation of Concerns*) e código limpo (*Clean Code*).
 
