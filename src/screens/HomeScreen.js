@@ -104,7 +104,7 @@ export default function HomeScreen({ navigation }) {
             <MenuCard 
               title="Instruções" 
               icon="cog-outline" 
-              onPress={() => {}} 
+              onPress={() => navigation.navigate('Tutorial')} 
             />
           </View>
 

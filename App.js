@@ -13,6 +13,7 @@ import RelatoriosScreen from './src/screens/relatorioScreen';
 import PlanoNegocioScreen from './src/screens/PlanoNegocioScreen';
 import ProjecaoVendasScreen from './src/screens/ProjecoesVendasScreen';
 import SelecaoProdutoScreen from './src/screens/SelecaoProdutoScreen';
+import TutorialScreen from './src/screens/TutorialScreen';
 
 const Stack = createStackNavigator();
 
@@ -77,6 +78,11 @@ export default function App() {
             name="PlanoNegocio" 
             component={PlanoNegocioScreen} 
             options={{ title: 'Plano de Negócio' }} 
+          />
+          <Stack.Screen 
+            name="Tutorial" 
+            component={TutorialScreen} 
+            options={{ headerShown:false }} 
           />
         </Stack.Navigator>
       </NavigationContainer>
