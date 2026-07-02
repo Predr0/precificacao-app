@@ -35,7 +35,7 @@ export default function DespesasVariaveis({ navigation }) {
         
         <View className="mb-8">
           <Text style={{ color: roxo, fontSize: rf(30) }} className="font-black uppercase tracking-tighter">Variáveis</Text>
-          <Text style={{ fontSize: rf(12) }} className="text-gray-400 font-bold uppercase">Gastos Ocasionais (RF08)</Text>
+          <Text style={{ fontSize: rf(12) }} className="text-gray-400 font-bold uppercase">Gastos Ocasionais</Text>
         </View>
 
         <View className="bg-purple-50/50 p-6 rounded-[40px] mb-8 border border-purple-100">
