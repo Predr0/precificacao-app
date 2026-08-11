@@ -19,8 +19,8 @@ export default function TutorialScreen({ navigation }) {
 
 
   const paginasTutorial = [
-    require('../../assets/tutorial1.jpg'), 
-    require('../../assets/tutorial.jpg'),  
+    require('../../assets/manuelPrecificacao1.jpg'), 
+    require('../../assets/manuelPrecificacao2.jpg'),  
   ];
 
   return (
